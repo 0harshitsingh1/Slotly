@@ -28,46 +28,37 @@ one-off schedule exceptions (holidays, early closures).
 
 ## Tech Stack
 
-- **Frontend/Backend:** Next.js 15 (App Router), TypeScript, Server Actions
-- **Database:** PostgreSQL, Prisma ORM
-- **Auth:** NextAuth (Auth.js v5), Credentials provider
-- **Email:** Resend
-- **Deployment:** Vercel + Neon/Postgres.app
+- Frontend/Backend: Next.js 15 (App Router), TypeScript, Server Actions
+- Database: PostgreSQL, Prisma ORM
+- Auth: NextAuth (Auth.js v5), Credentials provider
+- Email: Resend
+- Deployment: Vercel + Neon/Postgres.app
 
 ## Technical Highlights
 
-- **Conflict-free booking logic:** availability slots are computed
+- Conflict-free booking logic: availability slots are computed
   server-side by combining weekly availability, one-off exceptions,
   and existing bookings (with buffer time). Booking creation
   re-validates availability inside a database transaction and relies
   on a unique constraint as a final safety net against race conditions.
-- **Timezone handling:** all timestamps are stored in UTC and
-  converted to the business's or customer's local timezone at display
-  time.
+- Timezone handling: all timestamps are stored in UTC and converted
+  to the business's or customer's local timezone at display time.
 
 ## Running Locally
 
 1. Clone the repo and install dependencies:
-```bash
    git clone https://github.com/your-username/Slotly.git
    cd Slotly
    npm install
-```
 
-2. Set up your environment variables — copy `.env.example` to `.env`
+2. Set up your environment variables — copy .env.example to .env
    and fill in your PostgreSQL connection string and a NextAuth secret:
-```bash
    cp .env.example .env
-```
 
 3. Push the Prisma schema to your database:
-```bash
    npx prisma db push
-```
 
 4. Start the dev server:
-```bash
    npm run dev
-```
 
-5. Open [http://localhost:3000](http://localhost:3000)
+5. Open http://localhost:3000
