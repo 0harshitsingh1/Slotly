@@ -58,6 +58,8 @@ model Business {
   description String?
   timezone    String   @default("UTC")
   slug        String   @unique
+  latitude    Float?
+  longitude   Float?
 
   // Relations:
   // - FK to User model (the business owner).

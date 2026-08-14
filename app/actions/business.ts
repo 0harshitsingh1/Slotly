@@ -22,10 +22,15 @@ export async function createBusinessAction(
     redirect("/login");
   }
 
+  const rawLatitude = formData.get("latitude");
+  const rawLongitude = formData.get("longitude");
+
   const raw = {
     name: formData.get("name"),
     description: formData.get("description"),
     timezone: formData.get("timezone"),
+    latitude: rawLatitude !== "" && rawLatitude !== null ? rawLatitude : undefined,
+    longitude: rawLongitude !== "" && rawLongitude !== null ? rawLongitude : undefined,
   };
 
   const result = CreateBusinessSchema.safeParse(raw);
@@ -37,7 +42,7 @@ export async function createBusinessAction(
     };
   }
 
-  const { name, description, timezone } = result.data;
+  const { name, description, timezone, latitude, longitude } = result.data;
   const ownerId = session.user.id;
 
   try {
@@ -62,6 +67,8 @@ export async function createBusinessAction(
         description: description || null,
         timezone,
         slug,
+        latitude: latitude ?? null,
+        longitude: longitude ?? null,
       },
     });
   } catch (error) {

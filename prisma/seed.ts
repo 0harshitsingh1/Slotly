@@ -48,6 +48,8 @@ async function main() {
       description: "Boutique salon offering professional haircut, coloring, and styling services.",
       timezone: "America/New_York",
       owner_id: owner.id,
+      latitude: 40.7128,
+      longitude: -74.0060,
     },
     create: {
       owner_id: owner.id,
@@ -55,6 +57,8 @@ async function main() {
       slug: "glow-and-grace",
       description: "Boutique salon offering professional haircut, coloring, and styling services.",
       timezone: "America/New_York",
+      latitude: 40.7128,
+      longitude: -74.0060,
     },
   });
 
@@ -73,7 +77,7 @@ async function main() {
     },
   });
 
-  const coloring = await prisma.service.create({
+  await prisma.service.create({
     data: {
       business_id: business.id,
       name: "Color & Highlights",
@@ -83,7 +87,7 @@ async function main() {
     },
   });
 
-  const blowout = await prisma.service.create({
+  await prisma.service.create({
     data: {
       business_id: business.id,
       name: "Express Blowout",

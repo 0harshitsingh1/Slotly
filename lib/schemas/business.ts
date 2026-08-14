@@ -96,6 +96,18 @@ export const CreateBusinessSchema = z.object({
   timezone: z.enum(TIMEZONES, {
     message: "Please select a valid timezone.",
   }),
+  latitude: z.coerce
+    .number()
+    .min(-90, "Latitude must be between -90 and 90.")
+    .max(90, "Latitude must be between -90 and 90.")
+    .optional()
+    .nullable(),
+  longitude: z.coerce
+    .number()
+    .min(-180, "Longitude must be between -180 and 180.")
+    .max(180, "Longitude must be between -180 and 180.")
+    .optional()
+    .nullable(),
 });
 
 export type CreateBusinessInput = z.infer<typeof CreateBusinessSchema>;
