@@ -56,7 +56,7 @@ export default async function BusinessBookingPage({
   const selectedServiceId =
     queryServiceId || (business.services.length > 0 ? business.services[0].id : "");
 
-  // Fix: Compute today's date (YYYY-MM-DD) in the business's timezone, not server UTC
+  // Compute today's date (YYYY-MM-DD) in the business's timezone
   const todayStr = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
     month: "2-digit",
@@ -71,18 +71,29 @@ export default async function BusinessBookingPage({
   );
 
   // 2. Fetch available slots if service and date are selected
-  let availableSlots: { startAt: Date; endAt: Date }[] = [];
+  let slotsResult: { slots: { startAt: Date; endAt: Date }[]; isClosed: boolean } = {
+    slots: [],
+    isClosed: false,
+  };
   let slotsFetched = false;
+  let dayName = "";
 
   if (selectedServiceId && selectedDateStr) {
     const targetDate = new Date(`${selectedDateStr}T12:00:00Z`);
-    availableSlots = await getAvailableSlots(
+    slotsResult = await getAvailableSlots(
       business.id,
       selectedServiceId,
       targetDate
     );
     slotsFetched = true;
+
+    dayName = new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      timeZone: business.timezone,
+    }).format(targetDate);
   }
+
+  const availableSlots = slotsResult.slots;
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10 dark:bg-gray-900">
@@ -164,7 +175,33 @@ export default async function BusinessBookingPage({
                   );
                 })}
               </div>
+            ) : slotsResult.isClosed ? (
+              /* Case 1: Closed on [day name] */
+              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-8 text-center dark:border-gray-800">
+                <div className="rounded-full bg-red-50 p-3 text-red-600 dark:bg-red-950/50 dark:text-red-400 mb-3">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                  Closed on {dayName}
+                </h4>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  This business is closed or has no operating hours configured for {dayName}s ({selectedDateStr}). Please try selecting a different date.
+                </p>
+              </div>
             ) : (
+              /* Case 2: Fully Booked / No Slots Available */
               <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-8 text-center dark:border-gray-800">
                 <div className="rounded-full bg-amber-50 p-3 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 mb-3">
                   <svg

@@ -23,6 +23,11 @@ export interface AvailabilityExceptionData {
   end_time: string | null;
 }
 
+export interface AvailableSlotsResult {
+  slots: TimeSlot[];
+  isClosed: boolean;
+}
+
 export function parseLocalTime(
   hhmm: string,
   baseDate: Date,
@@ -42,9 +47,10 @@ export function computeAvailableSlots(
   durationMinutes: number,
   bufferMinutes: number,
   existingBookings: ExistingBooking[],
-): TimeSlot[] {
+): AvailableSlotsResult {
+  // Case 1: Exception specifically marks day as closed
   if (exception?.is_closed) {
-    return [];
+    return { slots: [], isClosed: true };
   }
 
   let windows: AvailabilityWindow[];
@@ -56,11 +62,11 @@ export function computeAvailableSlots(
   } else if (weeklyWindows.length > 0) {
     windows = weeklyWindows;
   } else {
-    return [];
+    // Case 2: No weekly availability windows configured for this day of week
+    return { slots: [], isClosed: true };
   }
 
   const zonedMidnight = startOfDay(toZonedTime(date, timezone));
-
   const slots: TimeSlot[] = [];
 
   for (const window of windows) {
@@ -93,7 +99,9 @@ export function computeAvailableSlots(
     }
   }
 
-  return slots;
+  // The day is OPEN (isClosed = false).
+  // If slots.length === 0, it means all generated slots were taken by existing bookings (FULLY BOOKED).
+  return { slots, isClosed: false };
 }
 
 export async function getAvailableSlots(
@@ -101,13 +109,13 @@ export async function getAvailableSlots(
   serviceId: string,
   date: Date,
   prismaClient: any = db
-): Promise<TimeSlot[]> {
+): Promise<AvailableSlotsResult> {
   const business = await prismaClient.business.findUnique({
     where: { id: businessId },
     select: { timezone: true },
   });
 
-  if (!business) return [];
+  if (!business) return { slots: [], isClosed: true };
 
   const zonedDate = toZonedTime(date, business.timezone);
   const dayOfWeek = zonedDate.getDay();
@@ -136,9 +144,9 @@ export async function getAvailableSlots(
     select: { duration_minutes: true, buffer_minutes: true },
   });
 
-  if (!service) return [];
+  if (!service) return { slots: [], isClosed: true };
 
-  // Fix: Fetch ALL confirmed bookings that overlap with the day window [dayStartUTC, dayEndUTC)
+  // Fetch ALL confirmed bookings that overlap with the day window [dayStartUTC, dayEndUTC)
   const existingBookings = await prismaClient.booking.findMany({
     where: {
       business_id: businessId,

@@ -26,7 +26,7 @@ const NINE_TO_FIVE: AvailabilityWindow[] = [
 
 describe("computeAvailableSlots", () => {
   it("returns all slots when there are no existing bookings", () => {
-    const slots = computeAvailableSlots(
+    const result = computeAvailableSlots(
       TEST_DATE,
       TZ,
       NINE_TO_FIVE,
@@ -36,11 +36,12 @@ describe("computeAvailableSlots", () => {
       [],
     );
 
-    expect(slots).toHaveLength(8);
-    expect(slots[0].startAt).toEqual(utc("09:00"));
-    expect(slots[0].endAt).toEqual(utc("10:00"));
-    expect(slots[7].startAt).toEqual(utc("16:00"));
-    expect(slots[7].endAt).toEqual(utc("17:00"));
+    expect(result.isClosed).toBe(false);
+    expect(result.slots).toHaveLength(8);
+    expect(result.slots[0].startAt).toEqual(utc("09:00"));
+    expect(result.slots[0].endAt).toEqual(utc("10:00"));
+    expect(result.slots[7].startAt).toEqual(utc("16:00"));
+    expect(result.slots[7].endAt).toEqual(utc("17:00"));
   });
 
   it("excludes the slot occupied by a mid-day booking", () => {
@@ -48,7 +49,7 @@ describe("computeAvailableSlots", () => {
       { start_at: utc("12:00"), end_at: utc("13:00") },
     ];
 
-    const slots = computeAvailableSlots(
+    const result = computeAvailableSlots(
       TEST_DATE,
       TZ,
       NINE_TO_FIVE,
@@ -58,8 +59,9 @@ describe("computeAvailableSlots", () => {
       bookings,
     );
 
-    expect(slots).toHaveLength(7);
-    const starts = slots.map((s) => s.startAt.getTime());
+    expect(result.isClosed).toBe(false);
+    expect(result.slots).toHaveLength(7);
+    const starts = result.slots.map((s) => s.startAt.getTime());
     expect(starts).not.toContain(utc("12:00").getTime());
     expect(starts).toContain(utc("11:00").getTime());
     expect(starts).toContain(utc("13:00").getTime());
@@ -70,7 +72,7 @@ describe("computeAvailableSlots", () => {
       { start_at: utc("12:00"), end_at: utc("13:00") },
     ];
 
-    const slots = computeAvailableSlots(
+    const result = computeAvailableSlots(
       TEST_DATE,
       TZ,
       NINE_TO_FIVE,
@@ -80,7 +82,8 @@ describe("computeAvailableSlots", () => {
       bookings,
     );
 
-    const starts = slots.map((s) => s.startAt.getTime());
+    expect(result.isClosed).toBe(false);
+    const starts = result.slots.map((s) => s.startAt.getTime());
 
     expect(starts).toContain(utc("11:00").getTime());
     expect(starts).toContain(utc("13:30").getTime());
@@ -90,14 +93,14 @@ describe("computeAvailableSlots", () => {
     expect(starts).not.toContain(utc("13:00").getTime());
   });
 
-  it("returns an empty array when the day is marked as closed", () => {
+  it("returns isClosed: true and an empty array when the day is marked as closed by an exception", () => {
     const exception: AvailabilityExceptionData = {
       is_closed: true,
       start_time: null,
       end_time: null,
     };
 
-    const slots = computeAvailableSlots(
+    const result = computeAvailableSlots(
       TEST_DATE,
       TZ,
       NINE_TO_FIVE,
@@ -107,7 +110,43 @@ describe("computeAvailableSlots", () => {
       [],
     );
 
-    expect(slots).toEqual([]);
+    expect(result.isClosed).toBe(true);
+    expect(result.slots).toEqual([]);
+  });
+
+  it("returns isClosed: true and an empty array when no weekly windows exist", () => {
+    const result = computeAvailableSlots(
+      TEST_DATE,
+      TZ,
+      [],
+      null,
+      60,
+      0,
+      [],
+    );
+
+    expect(result.isClosed).toBe(true);
+    expect(result.slots).toEqual([]);
+  });
+
+  it("returns isClosed: false and an empty array when the business is open but fully booked", () => {
+    // 09:00 - 10:00 (1-hour window) with a 60-min booking covering 09:00-10:00
+    const bookings: ExistingBooking[] = [
+      { start_at: utc("09:00"), end_at: utc("10:00") },
+    ];
+
+    const result = computeAvailableSlots(
+      TEST_DATE,
+      TZ,
+      [{ start_time: "09:00", end_time: "10:00" }],
+      null,
+      60,
+      0,
+      bookings,
+    );
+
+    expect(result.isClosed).toBe(false);
+    expect(result.slots).toEqual([]);
   });
 
   it("uses override hours from an exception instead of weekly windows", () => {
@@ -117,7 +156,7 @@ describe("computeAvailableSlots", () => {
       end_time: "14:00",
     };
 
-    const slots = computeAvailableSlots(
+    const result = computeAvailableSlots(
       TEST_DATE,
       TZ,
       NINE_TO_FIVE,
@@ -127,23 +166,10 @@ describe("computeAvailableSlots", () => {
       [],
     );
 
-    expect(slots).toHaveLength(4);
-    expect(slots[0].startAt).toEqual(utc("10:00"));
-    expect(slots[3].endAt).toEqual(utc("14:00"));
-  });
-
-  it("returns an empty array when no weekly windows exist", () => {
-    const slots = computeAvailableSlots(
-      TEST_DATE,
-      TZ,
-      [],
-      null,
-      60,
-      0,
-      [],
-    );
-
-    expect(slots).toEqual([]);
+    expect(result.isClosed).toBe(false);
+    expect(result.slots).toHaveLength(4);
+    expect(result.slots[0].startAt).toEqual(utc("10:00"));
+    expect(result.slots[3].endAt).toEqual(utc("14:00"));
   });
 
   it("handles multiple bookings correctly", () => {
@@ -152,7 +178,7 @@ describe("computeAvailableSlots", () => {
       { start_at: utc("14:00"), end_at: utc("15:00") },
     ];
 
-    const slots = computeAvailableSlots(
+    const result = computeAvailableSlots(
       TEST_DATE,
       TZ,
       NINE_TO_FIVE,
@@ -162,8 +188,9 @@ describe("computeAvailableSlots", () => {
       bookings,
     );
 
-    expect(slots).toHaveLength(6);
-    const starts = slots.map((s) => s.startAt.getTime());
+    expect(result.isClosed).toBe(false);
+    expect(result.slots).toHaveLength(6);
+    const starts = result.slots.map((s) => s.startAt.getTime());
 
     expect(starts).not.toContain(utc("09:00").getTime());
     expect(starts).not.toContain(utc("14:00").getTime());
@@ -177,7 +204,7 @@ describe("computeAvailableSlots", () => {
       { start_at: utc("12:00"), end_at: utc("13:00") },
     ];
 
-    const slots = computeAvailableSlots(
+    const result = computeAvailableSlots(
       TEST_DATE,
       TZ,
       [{ start_time: "13:30", end_time: "14:30" }],
@@ -187,8 +214,9 @@ describe("computeAvailableSlots", () => {
       bookings,
     );
 
-    expect(slots).toHaveLength(1);
-    expect(slots[0].startAt).toEqual(utc("13:30"));
+    expect(result.isClosed).toBe(false);
+    expect(result.slots).toHaveLength(1);
+    expect(result.slots[0].startAt).toEqual(utc("13:30"));
   });
 });
 
@@ -216,15 +244,14 @@ describe("getAvailableSlots integration with DB mock", () => {
       },
     };
 
-    const slots = await getAvailableSlots(
+    const { slots, isClosed } = await getAvailableSlots(
       "biz_123",
       "srv_123",
       new Date("2025-03-10T12:00:00Z"),
       mockPrisma as any
     );
 
-    // With 11:00 - 15:00 EDT override, 60-min service yields 4 slots: 11:00, 12:00, 13:00, 14:00
-    // 11:00 AM EDT = 15:00 UTC, 15:00 EDT = 19:00 UTC
+    expect(isClosed).toBe(false);
     expect(slots).toHaveLength(4);
     expect(slots[0].startAt.toISOString()).toBe("2025-03-10T15:00:00.000Z");
     expect(slots[3].endAt.toISOString()).toBe("2025-03-10T19:00:00.000Z");

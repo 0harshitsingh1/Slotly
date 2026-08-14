@@ -70,7 +70,7 @@ export async function createBookingAction(
     const booking = await db.$transaction(
       async (tx) => {
         // 1. Re-validate slot availability within the transaction
-        const availableSlots = await getAvailableSlots(
+        const { slots: availableSlots } = await getAvailableSlots(
           businessId,
           serviceId,
           requestedStartAt,
