@@ -1,110 +1,98 @@
 # Slotly
 
-A full-stack booking and scheduling platform for local businesses —
-salons, tutors, clinics, and similar service providers — who need a
-simple way to manage appointments without paying for enterprise
-scheduling software.
+Slotly is a full-stack appointment scheduling platform built for service providers — such as salons, tutors, clinics, and freelancers — who need an intuitive, self-hosted way to offer online booking without paying for enterprise scheduling software. It solves the complex problem of **conflict-free real-time scheduling** by dynamically computing available time slots based on weekly operating hours, custom holiday exceptions, appointment durations, and required buffer gaps. By wrapping availability checks and reservation inserts in `Serializable` database transactions and enforcing database-level unique constraints, Slotly guarantees zero double-bookings even when multiple customers attempt to book the exact same slot at the exact same millisecond.
 
-Business owners set their weekly availability and services; customers
-book open slots in real time. The core challenge Slotly solves is
-**conflict-free scheduling**: preventing double-bookings even when
-multiple customers try to book the same slot simultaneously, while
-correctly handling timezones, buffer time between appointments, and
-one-off schedule exceptions (holidays, early closures).
+## 🚀 Live Demo
 
-## Key Features
-
-- Role-based dashboards for business owners and customers
-- Real-time availability computation (weekly schedule + exceptions + existing bookings)
-- Race-condition-safe booking creation using database transactions (`Serializable` isolation level) and unique constraints
-- Resend email confirmations and cancellations
-- Timezone-aware display across business and customer views
-
-## Tech Stack
-
-- **Frontend/Backend:** Next.js 15 (App Router), TypeScript, Server Actions
-- **Database:** PostgreSQL, Prisma ORM
-- **Auth:** NextAuth (Auth.js v5), Credentials provider
-- **Email:** Resend API
-- **Deployment:** Vercel + Neon Postgres
-
-## Environment Variables
-
-| Variable | Description | Example / Location |
-|---|---|---|
-| `DATABASE_URL` | PostgreSQL connection string | Neon connection string with `?sslmode=require` |
-| `AUTH_SECRET` / `NEXTAUTH_SECRET` | NextAuth encryption secret | Generate with `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | Canonical app domain URL | `https://slotly.vercel.app` |
-| `RESEND_API_KEY` | Resend transactional email API key | `re_123456789...` |
-| `EMAIL_FROM` | Verified sender email address | `Slotly <onboarding@resend.dev>` |
+[View Live Demo](https://slotly-demo.vercel.app) *(Link placeholder — replace with your Vercel deployment URL)*
 
 ---
 
-## Deployment Guide: Vercel + Neon Postgres
+## 🛠️ Tech Stack
 
-Follow these exact steps to connect Neon Postgres and deploy Slotly on Vercel.
+- **Framework & Logic:** Next.js 15 (App Router), TypeScript, Server Actions, React 19
+- **Styling:** Vanilla CSS & Tailwind CSS
+- **Database & ORM:** PostgreSQL, Prisma ORM
+- **Authentication:** NextAuth (Auth.js v5), Credentials Provider, `bcryptjs`
+- **Email Notifications:** Resend API
+- **Testing & Deployment:** Vitest, Vercel, Neon Serverless Postgres
 
-### Step 1: Set Up Hosted Postgres on Neon
+---
 
-1. Go to [Neon.tech](https://neon.tech) and log in or create an account.
-2. Click **Create Project**, name your project (e.g., `slotly-db`), and select your preferred region.
-3. Once the database project is created, copy the **Pooled Connection String** from your dashboard (it looks like `postgresql://user:password@ep-cool-name-123.us-east-2.aws.neon.tech/neondb?sslmode=require`).
+## ⚡ Technical Highlights
 
-### Step 2: Deploy to Vercel
+Slotly specifically addresses two of the hardest engineering challenges in appointment scheduling software:
 
-1. Push your latest code to your GitHub repository.
-2. Go to the [Vercel Dashboard](https://vercel.com/dashboard) and click **Add New... > Project**.
-3. Import your GitHub `Slotly` repository.
-4. In the **Environment Variables** section, add the following variables:
-   - `DATABASE_URL` = *(Your Neon connection string from Step 1)*
-   - `AUTH_SECRET` = *(Random 32-character string from `openssl rand -base64 32`)*
-   - `NEXTAUTH_SECRET` = *(Same string as `AUTH_SECRET`)*
-   - `NEXTAUTH_URL` = `https://<your-project-name>.vercel.app`
-   - `RESEND_API_KEY` = *(Your Resend API Key)*
-   - `EMAIL_FROM` = `Slotly <onboarding@resend.dev>`
-5. Click **Deploy**.
-   *Note: The Vercel build script automatically runs `prisma generate && prisma migrate deploy && next build` to create all database tables in Neon during build.*
+### 1. Conflict-Free Booking Logic & Concurrency Control
+- **Dynamic Slot Generation:** The slot engine steps through business operating windows in increments of service duration, testing candidate intervals `[candidateStart, candidateEnd)` against buffered existing bookings `[bookingStart - buffer, bookingEnd + buffer)`. Two intervals overlap if and only if `candidateStart < bufferedEnd && candidateEnd > bufferedStart`.
+- **Race Condition Prevention:** To prevent double-booking when two concurrent requests hit the server simultaneously:
+  1. Availability is re-validated server-side **inside a `Serializable` database transaction**.
+  2. If two requests slip past the availability check concurrently, PostgreSQL enforces a composite unique constraint (`@@unique([business_id, start_at])`). The second insert immediately fails with error code `P2002`, returning a graceful *"This slot was just taken"* message to the user.
 
-### Step 3: Seed Demo Data in Production
+### 2. Timezone-Aware Computation & DST Handling
+- **UTC Database Storage:** All DateTime values (`start_at`, `end_at`, `date`) are stored strictly in UTC in PostgreSQL.
+- **DST-Safe Slot Calculation:** Local operating hours (`"09:00" - "17:00"`) are converted to UTC relative to the business's timezone using `date-fns-tz`. The engine calculates local day boundaries by adding wall-clock days before converting to UTC, properly handling 23-hour and 25-hour days during Daylight Saving Time (DST) spring-forward and fall-back transitions.
+- **Context-Specific Display**:
+  - **Public Booking Page & Owner Dashboard:** Converted to the **business's stored timezone** (`business.timezone`) so local operating hours remain fixed and accurate.
+  - **Customer Dashboard:** Dynamically converted on the client side to the **customer's local browser timezone** (`Intl.DateTimeFormat().resolvedOptions().timeZone`) so cross-timezone clients see appointments in their local wall-clock time.
 
-Once deployed, populate the Neon database with demo business data:
+---
 
-Run the seed command locally using your production `DATABASE_URL`:
+## 💻 Setup Instructions (Run Locally)
 
+### Prerequisites
+- Node.js 20+ installed
+- PostgreSQL database running locally or hosted (e.g. Neon, Supabase, Docker)
+
+### 1. Clone the Repository
 ```bash
-DATABASE_URL="your-neon-connection-string" npm run seed
+git clone https://github.com/0harshitsingh1/Slotly.git
+cd Slotly
 ```
 
-This populates:
-- **Demo Owner Account**: `owner@demo.com` / `password123`
-- **Demo Customer Account**: `customer@demo.com` / `password123`
-- **Demo Business**: `Glow & Grace Salon` (`/glow-and-grace`) with 3 active services and sample bookings.
+### 2. Install Dependencies
+```bash
+npm install
+```
 
----
+### 3. Configure Environment Variables
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+Open `.env` and fill in your connection string and secrets:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/slotly?schema=public"
+AUTH_SECRET="your-32-character-secret"
+NEXTAUTH_SECRET="your-32-character-secret"
+NEXTAUTH_URL="http://localhost:3000"
+RESEND_API_KEY="re_your_resend_key"
+EMAIL_FROM="Slotly <onboarding@resend.dev>"
+```
 
-## Running Locally
+### 4. Run Database Migrations
+```bash
+npx prisma migrate dev
+```
 
-1. Clone the repo and install dependencies:
-   ```bash
-   git clone https://github.com/0harshitsingh1/Slotly.git
-   cd Slotly
-   npm install
-   ```
+### 5. Seed Demo Data
+Populate the database with a sample business (`Glow & Grace Salon`), services, weekly hours, and demo user accounts:
+```bash
+npm run seed
+```
 
-2. Set up `.env` file:
-   ```bash
-   cp .env.example .env
-   ```
+**Demo Credentials Created:**
+- **Owner Account:** `owner@demo.com` / `password123`
+- **Customer Account:** `customer@demo.com` / `password123`
+- **Public Booking URL:** `http://localhost:3000/glow-and-grace`
 
-3. Run migrations and seed data:
-   ```bash
-   npx prisma migrate dev
-   npm run seed
-   ```
+### 6. Start the Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-4. Start the dev server:
-   ```bash
-   npm run dev
-   ```
-
-5. Open `http://localhost:3000`
+### 7. Run Unit Tests
+```bash
+npx vitest run
+```
