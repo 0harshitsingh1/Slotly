@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { fromZonedTime } from "date-fns-tz";
 import { auth } from "@/lib/auth";
 import db from "@/lib/db";
 
@@ -63,7 +64,8 @@ export async function createAvailabilityExceptionAction(
   }
 
   try {
-    const dayStartUTC = new Date(`${dateStr}T00:00:00.000Z`);
+    // Fix: Convert target date string (YYYY-MM-DD) to midnight UTC instant in the business's timezone
+    const dayStartUTC = fromZonedTime(`${dateStr}T00:00:00`, business.timezone);
     const dayEndUTC = new Date(dayStartUTC.getTime() + 24 * 60 * 60 * 1000);
 
     const existing = await db.availabilityException.findFirst({

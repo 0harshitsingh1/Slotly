@@ -23,11 +23,13 @@ function formatSlotTime(date: Date, timezone: string): string {
       timeZone: timezone,
     }).format(new Date(date));
   } catch {
-    return new Date(date).toLocaleTimeString([], {
+    // Explicit UTC fallback to avoid relying on server Node runtime machine local timezone
+    return new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-    });
+      timeZone: "UTC",
+    }).format(new Date(date));
   }
 }
 
@@ -54,7 +56,14 @@ export default async function BusinessBookingPage({
   const selectedServiceId =
     queryServiceId || (business.services.length > 0 ? business.services[0].id : "");
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  // Fix: Compute today's date (YYYY-MM-DD) in the business's timezone, not server UTC
+  const todayStr = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: business.timezone,
+  }).format(new Date());
+
   const selectedDateStr = queryDate || todayStr;
 
   const selectedService = business.services.find(

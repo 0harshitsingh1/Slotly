@@ -3,41 +3,11 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import db from "@/lib/db";
 import CancelCustomerBookingButton from "./CancelCustomerBookingButton";
+import CustomerBookingTime from "./CustomerBookingTime";
 
 export const metadata = {
   title: "My Bookings — Customer Dashboard",
 };
-
-function formatBookingDate(date: Date, timezone: string): string {
-  try {
-    return new Intl.DateTimeFormat("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      timeZone: timezone,
-    }).format(new Date(date));
-  } catch {
-    return new Date(date).toLocaleDateString();
-  }
-}
-
-function formatSlotTime(date: Date, timezone: string): string {
-  try {
-    return new Intl.DateTimeFormat("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: timezone,
-    }).format(new Date(date));
-  } catch {
-    return new Date(date).toLocaleTimeString([], {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  }
-}
 
 function getStatusBadge(status: string) {
   switch (status) {
@@ -140,10 +110,6 @@ export default async function CustomerBookingsPage() {
           {upcomingBookings.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
               {upcomingBookings.map((booking) => {
-                const dateStr = formatBookingDate(booking.start_at, booking.business.timezone);
-                const startTime = formatSlotTime(booking.start_at, booking.business.timezone);
-                const endTime = formatSlotTime(booking.end_at, booking.business.timezone);
-
                 return (
                   <div
                     key={booking.id}
@@ -162,9 +128,14 @@ export default async function CustomerBookingsPage() {
                       <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                         {booking.service.name} ({booking.service.duration_minutes} min)
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">{dateStr}</span> • {startTime} - {endTime} ({booking.business.timezone})
-                      </p>
+                      
+                      {/* Customer Local Browser Timezone Display */}
+                      <CustomerBookingTime
+                        startAt={booking.start_at.toISOString()}
+                        endAt={booking.end_at.toISOString()}
+                        businessTimezone={booking.business.timezone}
+                      />
+
                       <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
                         Price: ${booking.service.price.toFixed(2)}
                       </p>
@@ -203,10 +174,6 @@ export default async function CustomerBookingsPage() {
           {pastBookings.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
               {pastBookings.map((booking) => {
-                const dateStr = formatBookingDate(booking.start_at, booking.business.timezone);
-                const startTime = formatSlotTime(booking.start_at, booking.business.timezone);
-                const endTime = formatSlotTime(booking.end_at, booking.business.timezone);
-
                 return (
                   <div
                     key={booking.id}
@@ -225,9 +192,13 @@ export default async function CustomerBookingsPage() {
                       <p className="text-sm text-gray-700 dark:text-gray-300">
                         {booking.service.name}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {dateStr} • {startTime} - {endTime}
-                      </p>
+
+                      {/* Customer Local Browser Timezone Display */}
+                      <CustomerBookingTime
+                        startAt={booking.start_at.toISOString()}
+                        endAt={booking.end_at.toISOString()}
+                        businessTimezone={booking.business.timezone}
+                      />
                     </div>
 
                     <div className="self-start sm:self-center">

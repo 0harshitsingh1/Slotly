@@ -1,4 +1,4 @@
-import { addMinutes, startOfDay, setHours, setMinutes } from "date-fns";
+import { addMinutes, addDays, startOfDay, setHours, setMinutes } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import db from "../db";
 
@@ -117,9 +117,11 @@ export async function getAvailableSlots(
     select: { start_time: true, end_time: true },
   });
 
+  // Calculate dayStartUTC and dayEndUTC in the business's timezone safely handling DST days (23h/25h)
   const dayStart = startOfDay(zonedDate);
   const dayStartUTC = fromZonedTime(dayStart, business.timezone);
-  const dayEndUTC = addMinutes(dayStartUTC, 24 * 60);
+  const dayEndZoned = addDays(dayStart, 1);
+  const dayEndUTC = fromZonedTime(dayEndZoned, business.timezone);
 
   const exception = await prismaClient.availabilityException.findFirst({
     where: {
@@ -136,12 +138,13 @@ export async function getAvailableSlots(
 
   if (!service) return [];
 
+  // Fix: Fetch ALL confirmed bookings that overlap with the day window [dayStartUTC, dayEndUTC)
   const existingBookings = await prismaClient.booking.findMany({
     where: {
       business_id: businessId,
       status: "CONFIRMED",
-      start_at: { gte: dayStartUTC },
-      end_at: { lt: dayEndUTC },
+      start_at: { lt: dayEndUTC },
+      end_at: { gt: dayStartUTC },
     },
     select: { start_at: true, end_at: true },
   });
