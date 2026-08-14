@@ -46,6 +46,13 @@ export default async function OwnerDashboardPage() {
       badge: business ? `${business._count.services} service${business._count.services !== 1 ? "s" : ""}` : null,
     },
     {
+      title: "Weekly Availability",
+      description: "Configure default recurring operating hours for Monday through Sunday.",
+      href: "/owner/availability",
+      linkLabel: "Manage Schedule →",
+      badge: null,
+    },
+    {
       title: "Schedule Exceptions",
       description: "Set holidays, closures, or custom operating hours for specific dates.",
       href: "/owner/availability/exceptions",

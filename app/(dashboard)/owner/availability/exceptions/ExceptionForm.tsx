@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { createAvailabilityExceptionAction, ExceptionActionState } from "@/app/actions/availability";
+import { createAvailabilityExceptionAction, AvailabilityActionState } from "@/app/actions/availability";
 
 export default function ExceptionForm() {
   const [isClosed, setIsClosed] = useState(true);
-  const [state, setState] = useState<ExceptionActionState>({ success: false });
+  const [state, setState] = useState<AvailabilityActionState>({ success: false });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
