@@ -5,6 +5,10 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import db from "@/lib/db";
 import { getAvailableSlots } from "@/lib/slots/getAvailableSlots";
+import {
+  sendBookingConfirmationEmail,
+  sendBookingCancellationEmail,
+} from "@/lib/email";
 
 export interface CreateBookingInput {
   businessId: string;
@@ -17,6 +21,26 @@ export interface BookingActionResult {
   success: boolean;
   bookingId?: string;
   message?: string;
+}
+
+/**
+ * Helper to format booking start time in business timezone
+ */
+function formatTimeInTimezone(date: Date, timezone: string): string {
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: timezone,
+    }).format(new Date(date));
+  } catch {
+    return new Date(date).toLocaleString();
+  }
 }
 
 /**
@@ -94,6 +118,36 @@ export async function createBookingAction(
       }
     );
 
+    // Fetch details for email notification (outside transaction)
+    const bookingDetails = await db.booking.findUnique({
+      where: { id: booking.id },
+      include: {
+        customer: { select: { email: true, name: true } },
+        business: { select: { name: true, slug: true, timezone: true } },
+        service: { select: { name: true } },
+      },
+    });
+
+    if (bookingDetails) {
+      const formattedTime = formatTimeInTimezone(
+        bookingDetails.start_at,
+        bookingDetails.business.timezone
+      );
+
+      // Trigger Resend Confirmation Email
+      sendBookingConfirmationEmail({
+        bookingId: bookingDetails.id,
+        customerEmail: bookingDetails.customer.email,
+        customerName: bookingDetails.customer.name,
+        businessName: bookingDetails.business.name,
+        businessSlug: bookingDetails.business.slug,
+        serviceName: bookingDetails.service.name,
+        formattedTime,
+      }).catch((err) =>
+        console.error("Error sending booking confirmation email:", err)
+      );
+    }
+
     return {
       success: true,
       bookingId: booking.id,
@@ -161,9 +215,9 @@ export async function cancelOwnerBookingAction(
     const booking = await db.booking.findUnique({
       where: { id: bookingId },
       include: {
-        business: {
-          select: { owner_id: true },
-        },
+        customer: { select: { email: true, name: true } },
+        business: { select: { owner_id: true, name: true, slug: true, timezone: true } },
+        service: { select: { name: true } },
       },
     });
 
@@ -193,6 +247,24 @@ export async function cancelOwnerBookingAction(
       where: { id: bookingId },
       data: { status: "CANCELLED" },
     });
+
+    const formattedTime = formatTimeInTimezone(
+      booking.start_at,
+      booking.business.timezone
+    );
+
+    // Trigger Resend Cancellation Email
+    sendBookingCancellationEmail({
+      bookingId: booking.id,
+      customerEmail: booking.customer.email,
+      customerName: booking.customer.name,
+      businessName: booking.business.name,
+      businessSlug: booking.business.slug,
+      serviceName: booking.service.name,
+      formattedTime,
+    }).catch((err) =>
+      console.error("Error sending booking cancellation email:", err)
+    );
 
     revalidatePath("/owner/bookings");
 
@@ -240,6 +312,11 @@ export async function cancelCustomerBookingAction(
   try {
     const booking = await db.booking.findUnique({
       where: { id: bookingId },
+      include: {
+        customer: { select: { email: true, name: true } },
+        business: { select: { name: true, slug: true, timezone: true } },
+        service: { select: { name: true } },
+      },
     });
 
     if (!booking) {
@@ -269,6 +346,24 @@ export async function cancelCustomerBookingAction(
       where: { id: bookingId },
       data: { status: "CANCELLED" },
     });
+
+    const formattedTime = formatTimeInTimezone(
+      booking.start_at,
+      booking.business.timezone
+    );
+
+    // Trigger Resend Cancellation Email
+    sendBookingCancellationEmail({
+      bookingId: booking.id,
+      customerEmail: booking.customer.email,
+      customerName: booking.customer.name,
+      businessName: booking.business.name,
+      businessSlug: booking.business.slug,
+      serviceName: booking.service.name,
+      formattedTime,
+    }).catch((err) =>
+      console.error("Error sending booking cancellation email:", err)
+    );
 
     revalidatePath("/customer/bookings");
     revalidatePath("/customer");
