@@ -134,19 +134,21 @@ export async function createBookingAction(
         bookingDetails.business.timezone
       );
 
-      // Trigger Resend Confirmation Email (non-blocking try/catch)
-      sendBookingConfirmationEmail({
-        bookingId: bookingDetails.id,
-        customerEmail: bookingDetails.customer.email,
-        customerName: bookingDetails.customer.name,
-        businessName: bookingDetails.business.name,
-        businessSlug: bookingDetails.business.slug,
-        serviceName: bookingDetails.service.name,
-        formattedTime,
-        price: bookingDetails.service.price,
-      }).catch((err) =>
-        console.error("Error sending booking confirmation email:", err)
-      );
+      // Trigger Confirmation Email (awaited within try/catch so failure doesn't roll back booking)
+      try {
+        await sendBookingConfirmationEmail({
+          bookingId: bookingDetails.id,
+          customerEmail: bookingDetails.customer.email,
+          customerName: bookingDetails.customer.name,
+          businessName: bookingDetails.business.name,
+          businessSlug: bookingDetails.business.slug,
+          serviceName: bookingDetails.service.name,
+          formattedTime,
+          price: bookingDetails.service.price,
+        });
+      } catch (emailErr) {
+        console.error("Error triggering booking confirmation email:", emailErr);
+      }
     }
 
     return {
@@ -254,19 +256,21 @@ export async function cancelOwnerBookingAction(
       booking.business.timezone
     );
 
-    // Trigger Resend Cancellation Email (non-blocking try/catch)
-    sendBookingCancellationEmail({
-      bookingId: booking.id,
-      customerEmail: booking.customer.email,
-      customerName: booking.customer.name,
-      businessName: booking.business.name,
-      businessSlug: booking.business.slug,
-      serviceName: booking.service.name,
-      formattedTime,
-      price: booking.service.price,
-    }).catch((err) =>
-      console.error("Error sending booking cancellation email:", err)
-    );
+    // Trigger Cancellation Email (awaited within try/catch so email failure doesn't roll back cancellation)
+    try {
+      await sendBookingCancellationEmail({
+        bookingId: booking.id,
+        customerEmail: booking.customer.email,
+        customerName: booking.customer.name,
+        businessName: booking.business.name,
+        businessSlug: booking.business.slug,
+        serviceName: booking.service.name,
+        formattedTime,
+        price: booking.service.price,
+      });
+    } catch (emailErr) {
+      console.error("Error triggering owner booking cancellation email:", emailErr);
+    }
 
     revalidatePath("/owner/bookings");
 
@@ -354,19 +358,21 @@ export async function cancelCustomerBookingAction(
       booking.business.timezone
     );
 
-    // Trigger Resend Cancellation Email (non-blocking try/catch)
-    sendBookingCancellationEmail({
-      bookingId: booking.id,
-      customerEmail: booking.customer.email,
-      customerName: booking.customer.name,
-      businessName: booking.business.name,
-      businessSlug: booking.business.slug,
-      serviceName: booking.service.name,
-      formattedTime,
-      price: booking.service.price,
-    }).catch((err) =>
-      console.error("Error sending booking cancellation email:", err)
-    );
+    // Trigger Cancellation Email (awaited within try/catch so email failure doesn't roll back cancellation)
+    try {
+      await sendBookingCancellationEmail({
+        bookingId: booking.id,
+        customerEmail: booking.customer.email,
+        customerName: booking.customer.name,
+        businessName: booking.business.name,
+        businessSlug: booking.business.slug,
+        serviceName: booking.service.name,
+        formattedTime,
+        price: booking.service.price,
+      });
+    } catch (emailErr) {
+      console.error("Error triggering customer booking cancellation email:", emailErr);
+    }
 
     revalidatePath("/customer/bookings");
     revalidatePath("/customer");

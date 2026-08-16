@@ -1,5 +1,3 @@
-import { Resend } from "resend";
-
 export interface BookingEmailDetails {
   bookingId: string;
   customerEmail: string;
@@ -11,37 +9,102 @@ export interface BookingEmailDetails {
   price: number;
 }
 
-/**
- * Dynamically initialize Resend client using process.env.RESEND_API_KEY
- */
-function getResendClient(): Resend {
-  const apiKey = process.env.RESEND_API_KEY;
-  console.log("logging api key:---  ", apiKey)
-  if (!apiKey) {
-    console.warn("Warning: RESEND_API_KEY is not defined in environment variables");
-  }
-  return new Resend(apiKey || "missing_api_key");
+interface SendBrevoEmailOptions {
+  toEmail: string;
+  toName?: string | null;
+  subject: string;
+  htmlContent: string;
 }
 
-// Default sandbox sender address for Resend testing
-// NOTE FOR PRODUCTION: Resend's default "onboarding@resend.dev" only sends to your own registered account email in test mode.
-// To send confirmation/cancellation emails to external customers, verify a custom domain in your Resend Dashboard (https://resend.com/domains)
-// and set process.env.EMAIL_FROM to your domain sender (e.g., "Slotly <bookings@yourdomain.com>").
-const FROM_EMAIL = process.env.EMAIL_FROM || "Slotly <onboarding@resend.dev>";
-const BASE_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+/**
+ * Helper to parse "Name <email@domain.com>" or "email@domain.com" into Brevo sender object
+ */
+function parseBrevoSender(fromStr: string): { name: string; email: string } {
+  const match = fromStr.match(/^(?:"?([^"]*)"?\s)?<([^>]+)>$/);
+  if (match && match[2]) {
+    return { name: match[1] || "Slotly Bookings", email: match[2].trim() };
+  }
+  return { name: "Slotly Bookings", email: fromStr.trim() };
+}
 
 /**
- * Send booking CONFIRMATION HTML email via Resend API
+ * Send transactional email using Brevo v3 REST API (https://api.brevo.com/v3/smtp/email)
+ */
+async function sendBrevoEmail(options: SendBrevoEmailOptions) {
+  const apiKey = process.env.BREVO_API_KEY;
+
+  // NOTE FOR BREVO CONFIGURATION:
+  // BREVO_SENDER_EMAIL must match a verified sender address configured in your Brevo Dashboard (https://app.brevo.com/senders).
+  // Example: BREVO_SENDER_EMAIL="your-verified-email@gmail.com" or BREVO_SENDER_EMAIL="Slotly Bookings <your-verified-email@gmail.com>"
+  const senderStr =
+    process.env.BREVO_SENDER_EMAIL ||
+    process.env.EMAIL_FROM ||
+    "onboarding@slotly.app";
+
+  if (!apiKey) {
+    console.warn("⚠️ Warning: BREVO_API_KEY is not defined in environment variables!");
+    return { success: false, error: "BREVO_API_KEY is missing." };
+  }
+
+  const sender = parseBrevoSender(senderStr);
+
+  const payload = {
+    sender,
+    to: [
+      {
+        email: options.toEmail,
+        name: options.toName || "Valued Customer",
+      },
+    ],
+    subject: options.subject,
+    htmlContent: options.htmlContent,
+  };
+
+  console.log(
+    `✉️ Attempting to send email via Brevo to "${options.toEmail}" from "${sender.name} <${sender.email}>"...`
+  );
+
+  try {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "api-key": apiKey,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      console.error("❌ Brevo API Error Response:", JSON.stringify(responseData, null, 2));
+      return { success: false, error: responseData };
+    }
+
+    console.log("✅ Email sent successfully via Brevo API. Message ID:", responseData.messageId);
+    return { success: true, data: responseData };
+  } catch (error: any) {
+    console.error(
+      "❌ Brevo Email Fetch Exception:",
+      JSON.stringify(error, Object.getOwnPropertyNames(error), 2)
+    );
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send booking CONFIRMATION HTML email via Brevo API
  */
 export async function sendBookingConfirmationEmail(details: BookingEmailDetails) {
   const { customerEmail, customerName, businessName, serviceName, formattedTime, price } = details;
 
-  const resend = getResendClient();
-  const cancelUrl = `${BASE_URL}/customer/bookings`;
+  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const cancelUrl = `${baseUrl}/customer/bookings`;
   const nameDisplay = customerName || "Valued Customer";
   const priceDisplay = typeof price === "number" ? `$${price.toFixed(2)}` : `$${price}`;
 
-  const html = `
+  const htmlContent = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -101,43 +164,26 @@ export async function sendBookingConfirmationEmail(details: BookingEmailDetails)
     </html>
   `;
 
-  try {
-    console.log(`✉️ Attempting to send confirmation email to "${customerEmail}" from "${FROM_EMAIL}"...`);
-    const data = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: customerEmail,
-      subject: `Booking Confirmed with ${businessName}`,
-      html,
-    });
-
-    if (data.error) {
-      console.error("❌ Resend API Error Response (Confirmation Email):", JSON.stringify(data.error, null, 2));
-      if (data.error.name === "validation_error" && data.error.message.includes("only send testing emails")) {
-        console.warn("💡 HINT: You are using Resend's free testing sender (onboarding@resend.dev). Resend requires the recipient email to match your Resend account email (harshitsingh5225@gmail.com). To test locally, book using harshitsingh5225@gmail.com, or verify a custom domain at https://resend.com/domains!");
-      }
-      return { success: false, error: data.error };
-    }
-
-    console.log("✅ Confirmation email sent successfully via Resend. Message ID:", data.data?.id);
-    return { success: true, data: data.data };
-  } catch (error: any) {
-    console.error("❌ Resend Email Exception (Confirmation Email):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-    return { success: false, error };
-  }
+  return sendBrevoEmail({
+    toEmail: customerEmail,
+    toName: customerName,
+    subject: `Booking Confirmed with ${businessName}`,
+    htmlContent,
+  });
 }
 
 /**
- * Send booking CANCELLATION HTML email via Resend API
+ * Send booking CANCELLATION HTML email via Brevo API
  */
 export async function sendBookingCancellationEmail(details: BookingEmailDetails) {
   const { customerEmail, customerName, businessName, businessSlug, serviceName, formattedTime, price } = details;
 
-  const resend = getResendClient();
-  const bookUrl = `${BASE_URL}/${businessSlug}`;
+  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const bookUrl = `${baseUrl}/${businessSlug}`;
   const nameDisplay = customerName || "Valued Customer";
   const priceDisplay = typeof price === "number" ? `$${price.toFixed(2)}` : `$${price}`;
 
-  const html = `
+  const htmlContent = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -200,27 +246,10 @@ export async function sendBookingCancellationEmail(details: BookingEmailDetails)
     </html>
   `;
 
-  try {
-    console.log(`✉️ Attempting to send cancellation email to "${customerEmail}" from "${FROM_EMAIL}"...`);
-    const data = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: customerEmail,
-      subject: `Booking Cancelled - ${businessName}`,
-      html,
-    });
-
-    if (data.error) {
-      console.error("❌ Resend API Error Response (Cancellation Email):", JSON.stringify(data.error, null, 2));
-      if (data.error.name === "validation_error" && data.error.message.includes("only send testing emails")) {
-        console.warn("💡 HINT: You are using Resend's free testing sender (onboarding@resend.dev). Resend requires the recipient email to match your Resend account email (harshitsingh5225@gmail.com). To test locally, book using harshitsingh5225@gmail.com, or verify a custom domain at https://resend.com/domains!");
-      }
-      return { success: false, error: data.error };
-    }
-
-    console.log("✅ Cancellation email sent successfully via Resend. Message ID:", data.data?.id);
-    return { success: true, data: data.data };
-  } catch (error: any) {
-    console.error("❌ Resend Email Exception (Cancellation Email):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-    return { success: false, error };
-  }
+  return sendBrevoEmail({
+    toEmail: customerEmail,
+    toName: customerName,
+    subject: `Booking Cancelled - ${businessName}`,
+    htmlContent,
+  });
 }
