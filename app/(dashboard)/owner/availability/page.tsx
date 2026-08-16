@@ -10,14 +10,14 @@ export const metadata = {
   title: "Availability & Schedule — Owner Dashboard",
 };
 
-function formatExceptionDate(date: Date, timezone: string): string {
+function formatExceptionDate(date: Date): string {
   try {
     return new Intl.DateTimeFormat("en-US", {
       weekday: "long",
       month: "short",
       day: "numeric",
       year: "numeric",
-      timeZone: timezone,
+      timeZone: "UTC",
     }).format(new Date(date));
   } catch {
     return new Date(date).toISOString().split("T")[0];
@@ -131,7 +131,7 @@ export default async function OwnerAvailabilityPage() {
             {exceptions.length > 0 ? (
               <div className="divide-y divide-gray-100 dark:divide-gray-800">
                 {exceptions.map((exc) => {
-                  const dateFormatted = formatExceptionDate(exc.date, business.timezone);
+                  const dateFormatted = formatExceptionDate(exc.date);
 
                   return (
                     <div

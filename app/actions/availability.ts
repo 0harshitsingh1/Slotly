@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { fromZonedTime } from "date-fns-tz";
 import { auth } from "@/lib/auth";
 import db from "@/lib/db";
 import {
@@ -125,9 +124,11 @@ export async function createAvailabilityExceptionAction(
 
   const dateStr = formData.get("date") as string;
   const isClosedRaw = formData.get("is_closed");
-  const isClosed = isClosedRaw === "true" || isClosedRaw === "on";
-  const startTime = (formData.get("start_time") as string) || null;
-  const endTime = (formData.get("end_time") as string) || null;
+  const isClosed = isClosedRaw === "true" || isClosedRaw === "on" || isClosedRaw === "1";
+  
+  // Fix Bug 2: Force start_time and end_time to null when isClosed is true
+  const startTime = isClosed ? null : ((formData.get("start_time") as string) || null);
+  const endTime = isClosed ? null : ((formData.get("end_time") as string) || null);
 
   // Zod Validation
   const validation = CreateExceptionSchema.safeParse({
@@ -147,8 +148,9 @@ export async function createAvailabilityExceptionAction(
   }
 
   try {
-    // Convert target date string (YYYY-MM-DD) to midnight UTC instant in the business's timezone
-    const dayStartUTC = fromZonedTime(`${dateStr}T00:00:00`, business.timezone);
+    // Fix Bug 1: Store calendar date as explicit UTC midnight instant (YYYY-MM-DDT00:00:00.000Z)
+    // This prevents timezone conversions from shifting the calendar date forward/backward by a day.
+    const dayStartUTC = new Date(`${dateStr}T00:00:00.000Z`);
     const dayEndUTC = new Date(dayStartUTC.getTime() + 24 * 60 * 60 * 1000);
 
     const existing = await db.availabilityException.findFirst({
@@ -162,6 +164,7 @@ export async function createAvailabilityExceptionAction(
       await db.availabilityException.update({
         where: { id: existing.id },
         data: {
+          date: dayStartUTC,
           is_closed: isClosed,
           start_time: isClosed ? null : startTime,
           end_time: isClosed ? null : endTime,

@@ -131,10 +131,21 @@ export async function getAvailableSlots(
   const dayEndZoned = addDays(dayStart, 1);
   const dayEndUTC = fromZonedTime(dayEndZoned, business.timezone);
 
+  // Derive calendar date YYYY-MM-DD in the business timezone for exception lookup
+  const dateStr = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: business.timezone,
+  }).format(date);
+
+  const exceptionDateUTC = new Date(`${dateStr}T00:00:00.000Z`);
+  const exceptionDateEndUTC = new Date(exceptionDateUTC.getTime() + 24 * 60 * 60 * 1000);
+
   const exception = await prismaClient.availabilityException.findFirst({
     where: {
       business_id: businessId,
-      date: { gte: dayStartUTC, lt: dayEndUTC },
+      date: { gte: exceptionDateUTC, lt: exceptionDateEndUTC },
     },
     select: { is_closed: true, start_time: true, end_time: true },
   });

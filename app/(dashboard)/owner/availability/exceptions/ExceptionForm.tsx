@@ -43,6 +43,9 @@ export default function ExceptionForm() {
         </div>
       )}
 
+      {/* Explicit Hidden Input for is_closed to guarantee FormData reliability */}
+      <input type="hidden" name="is_closed" value={isClosed ? "true" : "false"} />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Date Selector */}
         <div className="space-y-1.5">
@@ -61,14 +64,13 @@ export default function ExceptionForm() {
         {/* Fully Closed Toggle */}
         <div className="flex items-center space-x-3 sm:pt-6">
           <input
-            id="is_closed"
-            name="is_closed"
+            id="is_closed_checkbox"
             type="checkbox"
             checked={isClosed}
             onChange={(e) => setIsClosed(e.target.checked)}
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
           />
-          <label htmlFor="is_closed" className="text-sm font-medium text-gray-900 dark:text-gray-100">
+          <label htmlFor="is_closed_checkbox" className="text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer">
             Mark business as <span className="font-bold text-red-600 dark:text-red-400">FULLY CLOSED</span> on this date
           </label>
         </div>
