@@ -1,15 +1,5 @@
 import { Resend } from "resend";
 
-// 1. Initialize Resend client using environment variable
-const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy_key");
-
-// 2. Default sandbox sender address for Resend testing
-// NOTE FOR PRODUCTION: Resend's default "onboarding@resend.dev" only sends to your own registered account email in test mode.
-// To send confirmation/cancellation emails to external customers, verify a custom domain in your Resend Dashboard (https://resend.com/domains)
-// and set process.env.EMAIL_FROM to your domain sender (e.g., "Slotly <bookings@yourdomain.com>").
-const FROM_EMAIL = process.env.EMAIL_FROM || "Slotly <onboarding@resend.dev>";
-const BASE_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
-
 export interface BookingEmailDetails {
   bookingId: string;
   customerEmail: string;
@@ -22,11 +12,30 @@ export interface BookingEmailDetails {
 }
 
 /**
+ * Dynamically initialize Resend client using process.env.RESEND_API_KEY
+ */
+function getResendClient(): Resend {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("⚠️ Warning: RESEND_API_KEY is not defined in environment variables!");
+  }
+  return new Resend(apiKey || "missing_api_key");
+}
+
+// Default sandbox sender address for Resend testing
+// NOTE FOR PRODUCTION: Resend's default "onboarding@resend.dev" only sends to your own registered account email in test mode.
+// To send confirmation/cancellation emails to external customers, verify a custom domain in your Resend Dashboard (https://resend.com/domains)
+// and set process.env.EMAIL_FROM to your domain sender (e.g., "Slotly <bookings@yourdomain.com>").
+const FROM_EMAIL = process.env.EMAIL_FROM || "Slotly <onboarding@resend.dev>";
+const BASE_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+/**
  * Send booking CONFIRMATION HTML email via Resend API
  */
 export async function sendBookingConfirmationEmail(details: BookingEmailDetails) {
   const { customerEmail, customerName, businessName, serviceName, formattedTime, price } = details;
 
+  const resend = getResendClient();
   const cancelUrl = `${BASE_URL}/customer/bookings`;
   const nameDisplay = customerName || "Valued Customer";
   const priceDisplay = typeof price === "number" ? `$${price.toFixed(2)}` : `$${price}`;
@@ -91,17 +100,24 @@ export async function sendBookingConfirmationEmail(details: BookingEmailDetails)
     </html>
   `;
 
-  // Wrapped in try/catch so email failure does NOT fail the booking process
   try {
+    console.log(`✉️ Attempting to send confirmation email to "${customerEmail}" from "${FROM_EMAIL}"...`);
     const data = await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
       subject: `Booking Confirmed with ${businessName}`,
       html,
     });
-    return { success: true, data };
-  } catch (error) {
-    console.error("Failed to send booking confirmation email:", error);
+
+    if (data.error) {
+      console.error("❌ Resend API Error Response (Confirmation Email):", JSON.stringify(data.error, null, 2));
+      return { success: false, error: data.error };
+    }
+
+    console.log("✅ Confirmation email sent successfully via Resend. Message ID:", data.data?.id);
+    return { success: true, data: data.data };
+  } catch (error: any) {
+    console.error("❌ Resend Email Exception (Confirmation Email):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
     return { success: false, error };
   }
 }
@@ -112,6 +128,7 @@ export async function sendBookingConfirmationEmail(details: BookingEmailDetails)
 export async function sendBookingCancellationEmail(details: BookingEmailDetails) {
   const { customerEmail, customerName, businessName, businessSlug, serviceName, formattedTime, price } = details;
 
+  const resend = getResendClient();
   const bookUrl = `${BASE_URL}/${businessSlug}`;
   const nameDisplay = customerName || "Valued Customer";
   const priceDisplay = typeof price === "number" ? `$${price.toFixed(2)}` : `$${price}`;
@@ -179,17 +196,24 @@ export async function sendBookingCancellationEmail(details: BookingEmailDetails)
     </html>
   `;
 
-  // Wrapped in try/catch so email failure does NOT fail the cancellation process
   try {
+    console.log(`✉️ Attempting to send cancellation email to "${customerEmail}" from "${FROM_EMAIL}"...`);
     const data = await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
       subject: `Booking Cancelled - ${businessName}`,
       html,
     });
-    return { success: true, data };
-  } catch (error) {
-    console.error("Failed to send booking cancellation email:", error);
+
+    if (data.error) {
+      console.error("❌ Resend API Error Response (Cancellation Email):", JSON.stringify(data.error, null, 2));
+      return { success: false, error: data.error };
+    }
+
+    console.log("✅ Cancellation email sent successfully via Resend. Message ID:", data.data?.id);
+    return { success: true, data: data.data };
+  } catch (error: any) {
+    console.error("❌ Resend Email Exception (Cancellation Email):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
     return { success: false, error };
   }
 }
