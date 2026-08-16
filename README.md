@@ -14,7 +14,7 @@ Slotly is a full-stack appointment scheduling platform built for service provide
 - **Styling:** Vanilla CSS & Tailwind CSS
 - **Database & ORM:** PostgreSQL, Prisma ORM
 - **Authentication:** NextAuth (Auth.js v5), Credentials Provider, `bcryptjs`
-- **Email Notifications:** Resend API
+- **Email Notifications:** Brevo v3 REST API / Resend API
 - **Testing & Deployment:** Vitest, Vercel, Neon Serverless Postgres
 
 ---
@@ -66,8 +66,8 @@ DATABASE_URL="postgresql://user:password@localhost:5432/slotly?schema=public"
 AUTH_SECRET="your-32-character-secret"
 NEXTAUTH_SECRET="your-32-character-secret"
 NEXTAUTH_URL="http://localhost:3000"
-RESEND_API_KEY="re_your_resend_key"
-EMAIL_FROM="Slotly <onboarding@resend.dev>"
+BREVO_API_KEY="xkeysib-your_brevo_api_key"
+BREVO_SENDER_EMAIL="your-verified-email@gmail.com"
 ```
 
 ### 4. Run Database Migrations
@@ -96,3 +96,45 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```bash
 npx vitest run
 ```
+
+---
+
+## ☁️ Production Deployment (Vercel + Neon Postgres)
+
+### Build Process & Automated Migrations
+The repository contains an automated production build command in `package.json`:
+```json
+"scripts": {
+  "build": "prisma generate && prisma migrate deploy && next build"
+}
+```
+During every Vercel build, Prisma automatically generates the client and applies all pending migrations to your hosted Neon database before building the Next.js app.
+
+---
+
+### Step-by-Step Manual Guide: Connecting Neon & Vercel
+
+#### Step 1: Create a Neon Postgres Database
+1. Log in to [Neon Console](https://console.neon.tech).
+2. Click **Create Project**, enter project name `Slotly`, and select your preferred cloud region.
+3. In the project dashboard, copy your pooled connection string:
+   `postgresql://[user]:[password]@[ep-name].us-east-2.aws.neon.tech/neondb?sslmode=require`
+
+#### Step 2: Create Vercel Project & Configure Environment Variables
+1. Log in to [Vercel Dashboard](https://vercel.com) and click **Add New > Project**.
+2. Import your `Slotly` GitHub repository.
+3. In the **Environment Variables** section, add:
+   - `DATABASE_URL`: Your Neon connection string copied from Step 1.
+   - `AUTH_SECRET`: Generate a random 32-char string (`openssl rand -base64 32`).
+   - `NEXTAUTH_SECRET`: Same value as `AUTH_SECRET`.
+   - `NEXTAUTH_URL`: Your Vercel production URL (e.g. `https://slotly-demo.vercel.app`).
+   - `BREVO_API_KEY`: Your Brevo REST API key.
+   - `BREVO_SENDER_EMAIL`: Your verified sender email address in Brevo.
+4. Click **Deploy**.
+
+#### Step 3: Seed Production Database
+Once Vercel finishes deploying, run the seed command locally pointing to your Neon database URL to seed demo business data into production:
+```bash
+DATABASE_URL="postgresql://user:password@ep-name.neon.tech/neondb?sslmode=require" npx prisma db seed
+```
+Now your Vercel deployment will have the demo business (`Glow & Grace Salon`) ready to book!
