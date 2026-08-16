@@ -124,7 +124,7 @@ export async function createBookingAction(
       include: {
         customer: { select: { email: true, name: true } },
         business: { select: { name: true, slug: true, timezone: true } },
-        service: { select: { name: true } },
+        service: { select: { name: true, price: true } },
       },
     });
 
@@ -134,7 +134,7 @@ export async function createBookingAction(
         bookingDetails.business.timezone
       );
 
-      // Trigger Resend Confirmation Email
+      // Trigger Resend Confirmation Email (non-blocking try/catch)
       sendBookingConfirmationEmail({
         bookingId: bookingDetails.id,
         customerEmail: bookingDetails.customer.email,
@@ -143,6 +143,7 @@ export async function createBookingAction(
         businessSlug: bookingDetails.business.slug,
         serviceName: bookingDetails.service.name,
         formattedTime,
+        price: bookingDetails.service.price,
       }).catch((err) =>
         console.error("Error sending booking confirmation email:", err)
       );
@@ -217,7 +218,7 @@ export async function cancelOwnerBookingAction(
       include: {
         customer: { select: { email: true, name: true } },
         business: { select: { owner_id: true, name: true, slug: true, timezone: true } },
-        service: { select: { name: true } },
+        service: { select: { name: true, price: true } },
       },
     });
 
@@ -253,7 +254,7 @@ export async function cancelOwnerBookingAction(
       booking.business.timezone
     );
 
-    // Trigger Resend Cancellation Email
+    // Trigger Resend Cancellation Email (non-blocking try/catch)
     sendBookingCancellationEmail({
       bookingId: booking.id,
       customerEmail: booking.customer.email,
@@ -262,6 +263,7 @@ export async function cancelOwnerBookingAction(
       businessSlug: booking.business.slug,
       serviceName: booking.service.name,
       formattedTime,
+      price: booking.service.price,
     }).catch((err) =>
       console.error("Error sending booking cancellation email:", err)
     );
@@ -315,7 +317,7 @@ export async function cancelCustomerBookingAction(
       include: {
         customer: { select: { email: true, name: true } },
         business: { select: { name: true, slug: true, timezone: true } },
-        service: { select: { name: true } },
+        service: { select: { name: true, price: true } },
       },
     });
 
@@ -352,7 +354,7 @@ export async function cancelCustomerBookingAction(
       booking.business.timezone
     );
 
-    // Trigger Resend Cancellation Email
+    // Trigger Resend Cancellation Email (non-blocking try/catch)
     sendBookingCancellationEmail({
       bookingId: booking.id,
       customerEmail: booking.customer.email,
@@ -361,6 +363,7 @@ export async function cancelCustomerBookingAction(
       businessSlug: booking.business.slug,
       serviceName: booking.service.name,
       formattedTime,
+      price: booking.service.price,
     }).catch((err) =>
       console.error("Error sending booking cancellation email:", err)
     );
