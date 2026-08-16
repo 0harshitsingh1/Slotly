@@ -16,8 +16,9 @@ export interface BookingEmailDetails {
  */
 function getResendClient(): Resend {
   const apiKey = process.env.RESEND_API_KEY;
+  console.log("logging api key:---  ", apiKey)
   if (!apiKey) {
-    console.warn("⚠️ Warning: RESEND_API_KEY is not defined in environment variables!");
+    console.warn("Warning: RESEND_API_KEY is not defined in environment variables");
   }
   return new Resend(apiKey || "missing_api_key");
 }
@@ -111,6 +112,9 @@ export async function sendBookingConfirmationEmail(details: BookingEmailDetails)
 
     if (data.error) {
       console.error("❌ Resend API Error Response (Confirmation Email):", JSON.stringify(data.error, null, 2));
+      if (data.error.name === "validation_error" && data.error.message.includes("only send testing emails")) {
+        console.warn("💡 HINT: You are using Resend's free testing sender (onboarding@resend.dev). Resend requires the recipient email to match your Resend account email (harshitsingh5225@gmail.com). To test locally, book using harshitsingh5225@gmail.com, or verify a custom domain at https://resend.com/domains!");
+      }
       return { success: false, error: data.error };
     }
 
@@ -207,6 +211,9 @@ export async function sendBookingCancellationEmail(details: BookingEmailDetails)
 
     if (data.error) {
       console.error("❌ Resend API Error Response (Cancellation Email):", JSON.stringify(data.error, null, 2));
+      if (data.error.name === "validation_error" && data.error.message.includes("only send testing emails")) {
+        console.warn("💡 HINT: You are using Resend's free testing sender (onboarding@resend.dev). Resend requires the recipient email to match your Resend account email (harshitsingh5225@gmail.com). To test locally, book using harshitsingh5225@gmail.com, or verify a custom domain at https://resend.com/domains!");
+      }
       return { success: false, error: data.error };
     }
 
