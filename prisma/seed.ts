@@ -46,6 +46,7 @@ async function main() {
     update: {
       name: "Glow & Grace Salon",
       description: "Boutique salon offering professional haircut, coloring, and styling services.",
+      address: "123 Fifth Avenue, Suite 400, New York, NY 10003",
       timezone: "America/New_York",
       owner_id: owner.id,
       latitude: 40.7128,
@@ -56,6 +57,7 @@ async function main() {
       name: "Glow & Grace Salon",
       slug: "glow-and-grace",
       description: "Boutique salon offering professional haircut, coloring, and styling services.",
+      address: "123 Fifth Avenue, Suite 400, New York, NY 10003",
       timezone: "America/New_York",
       latitude: 40.7128,
       longitude: -74.0060,

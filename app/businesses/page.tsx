@@ -23,8 +23,12 @@ export default async function BusinessesDirectoryPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 dark:bg-gray-900">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <div className="relative min-h-[calc(100vh-4rem)] bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Consumer-Facing Ambient Mesh Glow Background */}
+      <div className="pointer-events-none absolute -top-36 left-0 h-[600px] w-[700px] rounded-full bg-sky-400/10 blur-[140px] dark:bg-sky-500/15" />
+      <div className="pointer-events-none absolute -bottom-36 -right-20 h-[500px] w-[500px] rounded-full bg-purple-400/10 blur-[140px] dark:bg-purple-900/15" />
+
+      <div className="relative z-10 mx-auto max-w-6xl space-y-8">
         {/* Navigation & Header */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
           <div>

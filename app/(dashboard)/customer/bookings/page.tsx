@@ -2,52 +2,17 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import db from "@/lib/db";
-import CancelCustomerBookingButton from "./CancelCustomerBookingButton";
-import CustomerBookingTime from "./CustomerBookingTime";
+import { CustomerBookingsList, SerializedCustomerBooking } from "./CustomerBookingsList";
 
 export const metadata = {
-  title: "My Bookings — Customer Dashboard",
+  title: "My Appointments — Customer Dashboard",
+  description: "View and manage your upcoming, past, and cancelled reservations.",
 };
-
-function getStatusBadge(status: string) {
-  switch (status) {
-    case "CONFIRMED":
-      return (
-        <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-950/60 dark:text-green-300">
-          CONFIRMED
-        </span>
-      );
-    case "PENDING":
-      return (
-        <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
-          PENDING
-        </span>
-      );
-    case "CANCELLED":
-      return (
-        <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-950/60 dark:text-red-300">
-          CANCELLED
-        </span>
-      );
-    case "COMPLETED":
-      return (
-        <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-          COMPLETED
-        </span>
-      );
-    default:
-      return (
-        <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-          {status}
-        </span>
-      );
-  }
-}
 
 export default async function CustomerBookingsPage() {
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect("/login");
   }
 
@@ -64,161 +29,52 @@ export default async function CustomerBookingsPage() {
     orderBy: { start_at: "asc" },
   });
 
-  const now = new Date();
-
-  // Separate into upcoming and past sections
-  const upcomingBookings = rawBookings
-    .filter((b) => b.end_at >= now)
-    .sort((a, b) => a.start_at.getTime() - b.start_at.getTime()); // Soonest first
-
-  const pastBookings = rawBookings
-    .filter((b) => b.end_at < now)
-    .sort((a, b) => b.start_at.getTime() - a.start_at.getTime()); // Most recent past first
+  const serializedBookings: SerializedCustomerBooking[] = rawBookings.map((b) => ({
+    id: b.id,
+    status: b.status,
+    start_at: b.start_at.toISOString(),
+    end_at: b.end_at.toISOString(),
+    business: {
+      name: b.business.name,
+      slug: b.business.slug,
+      timezone: b.business.timezone,
+    },
+    service: {
+      name: b.service.name,
+      duration_minutes: b.service.duration_minutes,
+      price: b.service.price,
+    },
+  }));
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 dark:bg-gray-900">
-      <div className="mx-auto max-w-5xl space-y-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="space-y-1">
             <Link
               href="/customer"
-              className="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400"
+              className="text-xs font-bold text-brand-600 hover:underline dark:text-brand-400"
             >
               ← Customer Dashboard
             </Link>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               My Appointments
             </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              View and manage your upcoming and past reservations.
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              View details, cancel active slots, or review past service reservations.
             </p>
           </div>
+
+          <Link href="/businesses">
+            <button className="rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600">
+              + Book New Appointment
+            </button>
+          </Link>
         </div>
 
-        {/* Section 1: Upcoming Bookings */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-3 dark:border-gray-800">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <span>📅 Upcoming Appointments</span>
-              <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:bg-blue-900/60 dark:text-blue-300">
-                {upcomingBookings.length}
-              </span>
-            </h2>
-          </div>
-
-          {upcomingBookings.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4">
-              {upcomingBookings.map((booking) => {
-                return (
-                  <div
-                    key={booking.id}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-gray-300 dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700 gap-4"
-                  >
-                    <div className="space-y-1.5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Link
-                          href={`/${booking.business.slug}`}
-                          className="text-base font-bold text-gray-900 hover:text-blue-600 hover:underline dark:text-gray-100 dark:hover:text-blue-400"
-                        >
-                          {booking.business.name}
-                        </Link>
-                        {getStatusBadge(booking.status)}
-                      </div>
-                      <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        {booking.service.name} ({booking.service.duration_minutes} min)
-                      </p>
-                      
-                      {/* Customer Local Browser Timezone Display */}
-                      <CustomerBookingTime
-                        startAt={booking.start_at.toISOString()}
-                        endAt={booking.end_at.toISOString()}
-                        businessTimezone={booking.business.timezone}
-                      />
-
-                      <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                        Price: ${booking.service.price.toFixed(2)}
-                      </p>
-                    </div>
-
-                    <div className="self-start sm:self-center">
-                      <CancelCustomerBookingButton
-                        bookingId={booking.id}
-                        status={booking.status}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center dark:border-gray-800">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                You have no upcoming appointments scheduled.
-              </p>
-            </div>
-          )}
-        </section>
-
-        {/* Section 2: Past Bookings */}
-        <section className="space-y-4 pt-4">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-3 dark:border-gray-800">
-            <h2 className="text-lg font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              <span>🕒 Past Appointments</span>
-              <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                {pastBookings.length}
-              </span>
-            </h2>
-          </div>
-
-          {pastBookings.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4">
-              {pastBookings.map((booking) => {
-                return (
-                  <div
-                    key={booking.id}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-xl border border-gray-200 bg-white/70 p-5 shadow-sm dark:border-gray-800 dark:bg-gray-950/60 opacity-80 gap-4"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Link
-                          href={`/${booking.business.slug}`}
-                          className="text-base font-semibold text-gray-900 hover:underline dark:text-gray-100"
-                        >
-                          {booking.business.name}
-                        </Link>
-                        {getStatusBadge(booking.status)}
-                      </div>
-                      <p className="text-sm text-gray-700 dark:text-gray-300">
-                        {booking.service.name}
-                      </p>
-
-                      {/* Customer Local Browser Timezone Display */}
-                      <CustomerBookingTime
-                        startAt={booking.start_at.toISOString()}
-                        endAt={booking.end_at.toISOString()}
-                        businessTimezone={booking.business.timezone}
-                      />
-                    </div>
-
-                    <div className="self-start sm:self-center">
-                      <CancelCustomerBookingButton
-                        bookingId={booking.id}
-                        status={booking.status}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center dark:border-gray-800">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                No past appointments found.
-              </p>
-            </div>
-          )}
-        </section>
+        {/* Filterable Bookings List */}
+        <CustomerBookingsList bookings={serializedBookings} />
       </div>
     </div>
   );

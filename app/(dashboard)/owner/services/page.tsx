@@ -110,49 +110,77 @@ export default async function ServicesPage() {
                   No services yet. Add your first service below.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-100 dark:border-gray-800">
-                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                          Service
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                          Duration
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                          Buffer
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                          Price
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
-                      {business.services.map((service) => (
-                        <tr
-                          key={service.id}
-                          className="hover:bg-gray-50 dark:hover:bg-gray-900"
-                        >
-                          <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
+                <>
+                  {/* Mobile Stacked Card View (<640px) */}
+                  <div className="divide-y divide-gray-100 block sm:hidden dark:divide-gray-800 p-4 space-y-3">
+                    {business.services.map((service) => (
+                      <div
+                        key={service.id}
+                        className="rounded-lg border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50 space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-sm text-slate-900 dark:text-white">
                             {service.name}
-                          </td>
-                          <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
-                            {service.duration_minutes} min
-                          </td>
-                          <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
-                            {service.buffer_minutes > 0
-                              ? `${service.buffer_minutes} min`
-                              : "—"}
-                          </td>
-                          <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-gray-100">
+                          </span>
+                          <span className="font-extrabold text-brand-600 dark:text-brand-400 text-sm">
                             ${service.price.toFixed(2)}
-                          </td>
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                          <span>⏱️ {service.duration_minutes} min duration</span>
+                          {service.buffer_minutes > 0 && (
+                            <span>🛡️ {service.buffer_minutes} min buffer</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop Table View (>=640px) */}
+                  <div className="hidden sm:block overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-gray-100 dark:border-gray-800">
+                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            Service
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            Duration
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            Buffer
+                          </th>
+                          <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            Price
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                        {business.services.map((service) => (
+                          <tr
+                            key={service.id}
+                            className="hover:bg-gray-50 dark:hover:bg-gray-900"
+                          >
+                            <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
+                              {service.name}
+                            </td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                              {service.duration_minutes} min
+                            </td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                              {service.buffer_minutes > 0
+                                ? `${service.buffer_minutes} min`
+                                : "—"}
+                            </td>
+                            <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-gray-100">
+                              ${service.price.toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
 

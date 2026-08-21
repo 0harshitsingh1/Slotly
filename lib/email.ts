@@ -253,3 +253,68 @@ export async function sendBookingCancellationEmail(details: BookingEmailDetails)
     htmlContent,
   });
 }
+
+export interface PasswordResetEmailDetails {
+  toEmail: string;
+  resetUrl: string;
+  recipientName?: string | null;
+}
+
+/**
+ * Send Password Reset HTML email via Brevo API
+ */
+export async function sendPasswordResetEmail(details: PasswordResetEmailDetails) {
+  const { toEmail, resetUrl, recipientName } = details;
+  const nameDisplay = recipientName || "Valued User";
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f5; color: #18181b; margin: 0; padding: 20px; }
+          .container { max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e4e4e7; }
+          .header { background: #2563eb; padding: 24px; text-align: center; color: #ffffff; }
+          .header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+          .content { padding: 24px; }
+          .btn { display: inline-block; background-color: #2563eb; color: #ffffff !important; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 14px; text-align: center; margin: 20px 0; }
+          .footer { padding: 16px; text-align: center; font-size: 12px; color: #71717a; border-top: 1px solid #f4f4f5; }
+          .note { font-size: 13px; color: #64748b; margin-top: 16px; line-height: 1.5; }
+          .url { word-break: break-all; color: #2563eb; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Reset Your Password</h1>
+          </div>
+          <div class="content">
+            <p>Hi <strong>${nameDisplay}</strong>,</p>
+            <p>We received a request to reset your password for your Slotly account.</p>
+            <p>Click the button below to choose a new password. This link will expire in <strong>1 hour</strong>.</p>
+            
+            <div style="text-align: center;">
+              <a href="${resetUrl}" class="btn">Reset Password</a>
+            </div>
+
+            <div class="note">
+              <p>If you did not request a password reset, you can safely ignore this email — your password will remain unchanged.</p>
+              <p>Or copy and paste this link into your browser:<br/><a href="${resetUrl}" class="url">${resetUrl}</a></p>
+            </div>
+          </div>
+          <div class="footer">
+            <p>Sent by Slotly Appointment Scheduling</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return sendBrevoEmail({
+    toEmail,
+    toName: recipientName,
+    subject: "Reset your Slotly password",
+    htmlContent,
+  });
+}

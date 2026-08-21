@@ -1,19 +1,38 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { createBusinessAction, type BusinessActionState } from "@/app/actions/business";
+import { updateBusinessAction, type BusinessActionState } from "@/app/actions/business";
 import { TIMEZONES } from "@/lib/schemas/business";
+
+interface BusinessData {
+  id: string;
+  name: string;
+  description: string | null;
+  address: string | null;
+  timezone: string;
+  latitude: number | null;
+  longitude: number | null;
+  slug: string;
+}
+
+interface EditBusinessFormProps {
+  business: BusinessData;
+}
 
 const initialState: BusinessActionState = { success: false };
 
-export function CreateBusinessForm() {
+export function EditBusinessForm({ business }: EditBusinessFormProps) {
   const [state, formAction, isPending] = useActionState(
-    createBusinessAction,
+    updateBusinessAction,
     initialState
   );
 
-  const [lat, setLat] = useState<string>("");
-  const [lng, setLng] = useState<string>("");
+  const [lat, setLat] = useState<string>(
+    business.latitude !== null ? business.latitude.toString() : ""
+  );
+  const [lng, setLng] = useState<string>(
+    business.longitude !== null ? business.longitude.toString() : ""
+  );
   const [geoLoading, setGeoLoading] = useState<boolean>(false);
   const [geoError, setGeoError] = useState<string | null>(null);
 
@@ -65,6 +84,7 @@ export function CreateBusinessForm() {
           id="name"
           name="name"
           type="text"
+          defaultValue={business.name}
           required
           maxLength={100}
           placeholder="e.g. Joe's Salon"
@@ -90,6 +110,7 @@ export function CreateBusinessForm() {
           id="description"
           name="description"
           rows={3}
+          defaultValue={business.description || ""}
           maxLength={500}
           placeholder="Tell customers what you offer…"
           className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
@@ -114,6 +135,7 @@ export function CreateBusinessForm() {
           id="address"
           name="address"
           rows={3}
+          defaultValue={business.address || ""}
           maxLength={300}
           placeholder="e.g. 123 Main St, Near City Mall, New York, NY 10001"
           className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
@@ -136,7 +158,7 @@ export function CreateBusinessForm() {
         <select
           id="timezone"
           name="timezone"
-          defaultValue="UTC"
+          defaultValue={business.timezone}
           required
           className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
         >
@@ -218,7 +240,7 @@ export function CreateBusinessForm() {
         disabled={isPending}
         className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
       >
-        {isPending ? "Creating…" : "Create Business"}
+        {isPending ? "Saving Changes…" : "Save Changes"}
       </button>
     </form>
   );

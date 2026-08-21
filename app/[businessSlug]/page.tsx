@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { db } from "@/lib/db";
 import { getAvailableSlots } from "@/lib/slots/getAvailableSlots";
 import BookingControls from "./BookingControls";
@@ -40,11 +41,14 @@ export default async function BusinessBookingPage({
   const { businessSlug } = await params;
   const { service: queryServiceId, date: queryDate } = await searchParams;
 
-  // 1. Fetch business and services
+  // 1. Fetch business, services, and photos
   const business = await db.business.findUnique({
     where: { slug: businessSlug },
     include: {
       services: true,
+      images: {
+        orderBy: { created_at: "asc" },
+      },
     },
   });
 
@@ -96,10 +100,14 @@ export default async function BusinessBookingPage({
   const availableSlots = slotsResult.slots;
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-10 dark:bg-gray-900">
-      <div className="mx-auto max-w-4xl space-y-8">
+    <div className="relative min-h-[calc(100vh-4rem)] bg-slate-50 px-4 py-10 dark:bg-slate-950 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Consumer-Facing Ambient Mesh Glow Background */}
+      <div className="pointer-events-none absolute -top-36 left-0 h-[600px] w-[700px] rounded-full bg-sky-400/10 blur-[140px] dark:bg-sky-500/15" />
+      <div className="pointer-events-none absolute -bottom-36 -right-20 h-[500px] w-[500px] rounded-full bg-purple-400/10 blur-[140px] dark:bg-purple-900/15" />
+
+      <div className="relative z-10 mx-auto max-w-4xl space-y-8">
         {/* Business Header */}
-        <header className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+        <header className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-950 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
@@ -110,11 +118,43 @@ export default async function BusinessBookingPage({
                   {business.description}
                 </p>
               )}
+              {business.address && (
+                <p className="mt-2.5 flex items-start gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span aria-hidden="true" className="mt-0.5 shrink-0">📍</span>
+                  <span className="whitespace-pre-line break-words leading-relaxed">{business.address}</span>
+                </p>
+              )}
             </div>
-            <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 self-start sm:self-auto">
+            <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 self-start sm:self-auto shrink-0">
               Timezone: {business.timezone}
             </div>
           </div>
+
+          {/* Photo Gallery (rendered ONLY if images exist) */}
+          {business.images.length > 0 && (
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">
+                Photos ({business.images.length})
+              </h2>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+                {business.images.map((img) => (
+                  <div
+                    key={img.id}
+                    className="relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-900 group"
+                  >
+                    <Image
+                      src={img.url}
+                      alt={`${business.name} photo`}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
+                      className="object-cover transition duration-300 group-hover:scale-105"
+                      unoptimized
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </header>
 
         {/* Services List summary section */}

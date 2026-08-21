@@ -43,11 +43,29 @@ model User {
 
   // Relations:
   // - A user with role OWNER can own multiple businesses.
-  businesses    Business[] @relation("BusinessOwner")
+  businesses          Business[]           @relation("BusinessOwner")
   // - A user with role CUSTOMER can create multiple bookings.
-  bookings      Booking[]  @relation("CustomerBookings")
+  bookings            Booking[]            @relation("CustomerBookings")
+  // - One-to-many relationship with password reset tokens.
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
+}
+
+/// PasswordResetToken model storing secure tokens for password resets.
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  user_id    String
+  token      String   @unique
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  // Relations:
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([token])
+  @@map("password_reset_tokens")
 }
 
 /// Business model representing service provider entities.
@@ -56,6 +74,7 @@ model Business {
   owner_id    String
   name        String
   description String?
+  address     String?
   timezone    String   @default("UTC")
   slug        String   @unique
   latitude    Float?
@@ -72,9 +91,25 @@ model Business {
   availabilityExceptions AvailabilityException[]
   // - One-to-many relationship with customer bookings.
   bookings               Booking[]
+  // - One-to-many relationship with uploaded business photos.
+  images                 BusinessImage[]
 
   @@index([owner_id])
   @@map("businesses")
+}
+
+/// BusinessImage model storing uploaded photo URLs for a business.
+model BusinessImage {
+  id          String   @id @default(cuid())
+  business_id String
+  url         String
+  created_at  DateTime @default(now())
+
+  // Relations:
+  business Business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  @@index([business_id])
+  @@map("business_images")
 }
 
 /// Service model defining appointment offerings by a business.

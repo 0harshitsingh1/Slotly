@@ -138,25 +138,25 @@ export default function BookForm({
           Reservation Summary
         </h3>
         <dl className="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
-          <div className="py-3 flex justify-between">
+          <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
             <dt className="text-gray-500 dark:text-gray-400">Business</dt>
             <dd className="font-semibold text-gray-900 dark:text-gray-100">
               {businessName}
             </dd>
           </div>
-          <div className="py-3 flex justify-between">
+          <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
             <dt className="text-gray-500 dark:text-gray-400">Service</dt>
             <dd className="font-semibold text-gray-900 dark:text-gray-100">
               {serviceName} ({durationMinutes} min)
             </dd>
           </div>
-          <div className="py-3 flex justify-between">
+          <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
             <dt className="text-gray-500 dark:text-gray-400">Time</dt>
             <dd className="font-semibold text-blue-600 dark:text-blue-400">
               {formattedTime}
             </dd>
           </div>
-          <div className="py-3 flex justify-between">
+          <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
             <dt className="text-gray-500 dark:text-gray-400">Total Price</dt>
             <dd className="font-extrabold text-gray-900 dark:text-gray-100">
               ${price.toFixed(2)}

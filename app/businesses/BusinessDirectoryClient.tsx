@@ -15,6 +15,7 @@ interface BusinessItem {
   name: string;
   slug: string;
   description: string | null;
+  address: string | null;
   timezone: string;
   latitude: number | null;
   longitude: number | null;
@@ -111,7 +112,8 @@ export default function BusinessDirectoryClient({
         (b) =>
           b.name.toLowerCase().includes(term) ||
           b.services.some((s) => s.name.toLowerCase().includes(term)) ||
-          (b.description && b.description.toLowerCase().includes(term))
+          (b.description && b.description.toLowerCase().includes(term)) ||
+          (b.address && b.address.toLowerCase().includes(term))
       );
     }
 
@@ -230,6 +232,13 @@ export default function BusinessDirectoryClient({
                   {business.description && (
                     <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
                       {business.description}
+                    </p>
+                  )}
+
+                  {business.address && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-1">
+                      <span className="shrink-0">📍</span>
+                      <span className="whitespace-pre-line break-words">{business.address}</span>
                     </p>
                   )}
 

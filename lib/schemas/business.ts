@@ -93,6 +93,12 @@ export const CreateBusinessSchema = z.object({
     .trim()
     .optional()
     .or(z.literal("")),
+  address: z
+    .string()
+    .max(300, "Address must be 300 characters or less.")
+    .trim()
+    .optional()
+    .or(z.literal("")),
   timezone: z.enum(TIMEZONES, {
     message: "Please select a valid timezone.",
   }),
@@ -111,3 +117,6 @@ export const CreateBusinessSchema = z.object({
 });
 
 export type CreateBusinessInput = z.infer<typeof CreateBusinessSchema>;
+
+export const UpdateBusinessSchema = CreateBusinessSchema;
+export type UpdateBusinessInput = z.infer<typeof UpdateBusinessSchema>;
