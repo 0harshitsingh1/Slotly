@@ -86,7 +86,7 @@ export function AddServiceForm() {
               htmlFor="price"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Price ($) <span className="text-red-500">*</span>
+              Price (₹) <span className="text-red-500">*</span>
             </label>
             <input
               id="price"
@@ -131,6 +131,32 @@ export function AddServiceForm() {
             )}
             <p className="mt-1 text-xs text-gray-400">
               Cleanup / preparation time added after this service.
+            </p>
+          </div>
+
+          {/* GST Number */}
+          <div className="sm:col-span-2">
+            <label
+              htmlFor="gst_number"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              GST Number <span className="text-xs text-gray-400 font-normal">(optional)</span>
+            </label>
+            <input
+              id="gst_number"
+              name="gst_number"
+              type="text"
+              maxLength={15}
+              placeholder="22AAAAA0000A1Z5"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm uppercase text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 placeholder:normal-case"
+            />
+            {state.errors?.gst_number && (
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                {state.errors.gst_number[0]}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-gray-400">
+              15-character GSTIN format (e.g. 22AAAAA0000A1Z5).
             </p>
           </div>
         </div>

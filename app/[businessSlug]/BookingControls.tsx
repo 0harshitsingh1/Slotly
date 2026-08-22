@@ -76,7 +76,7 @@ export default function BookingControls({
                         {service.name}
                       </span>
                       <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                        ${service.price.toFixed(2)}
+                        ₹{service.price.toFixed(2)}
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">

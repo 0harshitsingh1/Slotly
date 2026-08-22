@@ -181,7 +181,7 @@ export function OwnerBookingsList({ bookings, timezone }: OwnerBookingsListProps
                           <span className="font-semibold text-brand-600 dark:text-brand-400">
                             {startTime} - {endTime}
                           </span>{" "}
-                          • Price: ${booking.service.price.toFixed(2)} ({booking.service.duration_minutes} min)
+                          • Price: ₹{booking.service.price.toFixed(2)} ({booking.service.duration_minutes} min)
                         </p>
                       </div>
 

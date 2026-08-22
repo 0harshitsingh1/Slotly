@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { CreateServiceSchema } from "@/lib/schemas/service";
+import { CreateServiceSchema, UpdateServiceSchema } from "@/lib/schemas/service";
 
 export interface ServiceActionState {
   success: boolean;
@@ -41,6 +41,7 @@ export async function createServiceAction(
     duration_minutes: formData.get("duration_minutes"),
     price: formData.get("price"),
     buffer_minutes: formData.get("buffer_minutes") || "0",
+    gst_number: formData.get("gst_number") || "",
   };
 
   const result = CreateServiceSchema.safeParse(raw);
@@ -52,7 +53,7 @@ export async function createServiceAction(
     };
   }
 
-  const { name, duration_minutes, price, buffer_minutes } = result.data;
+  const { name, duration_minutes, price, buffer_minutes, gst_number } = result.data;
 
   try {
     await db.service.create({
@@ -62,6 +63,7 @@ export async function createServiceAction(
         duration_minutes,
         price,
         buffer_minutes,
+        gst_number: gst_number || null,
       },
     });
   } catch (error) {
@@ -75,4 +77,73 @@ export async function createServiceAction(
   revalidatePath("/owner/services");
 
   return { success: true, message: "Service added successfully." };
+}
+
+export async function updateServiceAction(
+  _prevState: ServiceActionState,
+  formData: FormData
+): Promise<ServiceActionState> {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "OWNER") {
+    redirect("/login");
+  }
+
+  const serviceId = formData.get("id") as string;
+  if (!serviceId) {
+    return { success: false, message: "Missing service ID." };
+  }
+
+  const existingService = await db.service.findFirst({
+    where: {
+      id: serviceId,
+      business: { owner_id: session.user.id },
+    },
+  });
+
+  if (!existingService) {
+    return { success: false, message: "Service not found or unauthorized." };
+  }
+
+  const raw = {
+    id: serviceId,
+    name: formData.get("name"),
+    duration_minutes: formData.get("duration_minutes"),
+    price: formData.get("price"),
+    buffer_minutes: formData.get("buffer_minutes") || "0",
+    gst_number: formData.get("gst_number") || "",
+  };
+
+  const result = UpdateServiceSchema.safeParse(raw);
+
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+
+  const { name, duration_minutes, price, buffer_minutes, gst_number } = result.data;
+
+  try {
+    await db.service.update({
+      where: { id: serviceId },
+      data: {
+        name,
+        duration_minutes,
+        price,
+        buffer_minutes,
+        gst_number: gst_number || null,
+      },
+    });
+  } catch (error) {
+    console.error("updateServiceAction error:", error);
+    return {
+      success: false,
+      message: "Failed to update service. Please try again.",
+    };
+  }
+
+  revalidatePath("/owner/services");
+
+  return { success: true, message: "Service updated successfully." };
 }

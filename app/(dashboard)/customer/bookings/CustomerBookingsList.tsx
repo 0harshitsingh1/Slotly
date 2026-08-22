@@ -140,7 +140,7 @@ export function CustomerBookingsList({ bookings }: CustomerBookingsListProps) {
                     />
 
                     <p className="text-xs font-bold text-brand-600 dark:text-brand-400">
-                      Price: ${booking.service.price.toFixed(2)}
+                      Price: ₹{booking.service.price.toFixed(2)}
                     </p>
                   </div>
 

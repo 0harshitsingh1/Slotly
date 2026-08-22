@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logoutAction } from "@/app/actions/auth";
 import { AddServiceForm } from "./_components/AddServiceForm";
+import { EditServiceModal } from "./_components/EditServiceModal";
 
 export const metadata = {
   title: "Services — Slotly Owner Dashboard",
@@ -122,9 +123,12 @@ export default async function ServicesPage() {
                           <span className="font-bold text-sm text-slate-900 dark:text-white">
                             {service.name}
                           </span>
-                          <span className="font-extrabold text-brand-600 dark:text-brand-400 text-sm">
-                            ${service.price.toFixed(2)}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-extrabold text-brand-600 dark:text-brand-400 text-sm">
+                              ₹{service.price.toFixed(2)}
+                            </span>
+                            <EditServiceModal service={service} />
+                          </div>
                         </div>
                         <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                           <span>⏱️ {service.duration_minutes} min duration</span>
@@ -132,6 +136,11 @@ export default async function ServicesPage() {
                             <span>🛡️ {service.buffer_minutes} min buffer</span>
                           )}
                         </div>
+                        {service.gst_number && (
+                          <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                            GSTIN: <span className="font-semibold text-slate-700 dark:text-slate-300">{service.gst_number}</span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -145,6 +154,9 @@ export default async function ServicesPage() {
                             Service
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            GSTIN
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                             Duration
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -152,6 +164,9 @@ export default async function ServicesPage() {
                           </th>
                           <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                             Price
+                          </th>
+                          <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            Actions
                           </th>
                         </tr>
                       </thead>
@@ -164,6 +179,9 @@ export default async function ServicesPage() {
                             <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
                               {service.name}
                             </td>
+                            <td className="px-6 py-4 text-xs font-mono text-gray-600 dark:text-gray-400">
+                              {service.gst_number || "—"}
+                            </td>
                             <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
                               {service.duration_minutes} min
                             </td>
@@ -173,7 +191,10 @@ export default async function ServicesPage() {
                                 : "—"}
                             </td>
                             <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-gray-100">
-                              ${service.price.toFixed(2)}
+                              ₹{service.price.toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <EditServiceModal service={service} />
                             </td>
                           </tr>
                         ))}

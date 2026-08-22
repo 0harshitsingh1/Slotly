@@ -59,7 +59,7 @@
   /* Custom Elevation & Shadows */
   --shadow-subtle: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-  --shadow-card-hover: 0 10px 25px -5px rgb(79 70 229 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  --shadow-card-hover: 0 12px 30px -5px rgb(79 70 229 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.04);
   --shadow-dropdown: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.08);
 
   /* Border Radii */
@@ -89,4 +89,55 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Performant Ambient Background Animations */
+@keyframes glowFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate3d(24px, -18px, 0) scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes glowFloatAlt {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate3d(-20px, 20px, 0) scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+.animate-glow-float {
+  animation: glowFloat 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-glow-float-alt {
+  animation: glowFloatAlt 22s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Accessibility: Respect Reduced Motion Settings */
+@media (prefers-reduced-motion: reduce) {
+  .animate-glow-float,
+  .animate-glow-float-alt {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

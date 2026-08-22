@@ -120,6 +120,7 @@ model Service {
   duration_minutes Int
   price            Float
   buffer_minutes   Int     @default(0)
+  gst_number       String?
 
   // Relations:
   // - FK to Business model.

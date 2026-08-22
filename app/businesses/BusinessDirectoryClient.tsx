@@ -203,7 +203,7 @@ export default function BusinessDirectoryClient({
             {processedBusinesses.map((business) => (
               <div
                 key={business.id}
-                className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 dark:hover:border-blue-900"
+                className="group flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 hover:border-brand-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-700"
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
@@ -254,7 +254,7 @@ export default function BusinessDirectoryClient({
                             key={service.id}
                             className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
                           >
-                            {service.name} • {service.duration_minutes}m • ${service.price.toFixed(2)}
+                            {service.name} • {service.duration_minutes}m • ₹{service.price.toFixed(2)}
                           </span>
                         ))}
                       </div>

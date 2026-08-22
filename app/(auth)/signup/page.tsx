@@ -64,8 +64,8 @@ export default function SignupPage() {
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-slate-50 dark:bg-slate-950 overflow-hidden">
-      {/* Subtle Background Mesh Glow */}
-      <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 h-[500px] w-[600px] rounded-full bg-brand-500/10 blur-[120px] dark:bg-brand-500/20" />
+      {/* Subtle Animated Background Mesh Glow */}
+      <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 h-[500px] w-[600px] rounded-full bg-brand-500/10 blur-[120px] dark:bg-brand-500/20 animate-glow-float" />
 
       <div className="w-full max-w-lg space-y-5 sm:space-y-6 rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
         {/* Header Visual Hierarchy */}

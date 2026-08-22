@@ -30,7 +30,7 @@ export default async function BusinessesDirectoryPage() {
 
       <div className="relative z-10 mx-auto max-w-6xl space-y-8">
         {/* Navigation & Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+        <header className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
           <div>
             <Link
               href="/"
@@ -44,21 +44,6 @@ export default async function BusinessesDirectoryPage() {
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Discover local service providers and book appointments in real time.
             </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-            >
-              List Your Business
-            </Link>
           </div>
         </header>
 

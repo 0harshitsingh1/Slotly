@@ -159,7 +159,7 @@ export default function BookForm({
           <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
             <dt className="text-gray-500 dark:text-gray-400">Total Price</dt>
             <dd className="font-extrabold text-gray-900 dark:text-gray-100">
-              ${price.toFixed(2)}
+              ₹{price.toFixed(2)}
             </dd>
           </div>
         </dl>

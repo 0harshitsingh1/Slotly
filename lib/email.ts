@@ -102,7 +102,7 @@ export async function sendBookingConfirmationEmail(details: BookingEmailDetails)
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
   const cancelUrl = `${baseUrl}/customer/bookings`;
   const nameDisplay = customerName || "Valued Customer";
-  const priceDisplay = typeof price === "number" ? `$${price.toFixed(2)}` : `$${price}`;
+  const priceDisplay = typeof price === "number" ? `₹${price.toFixed(2)}` : `₹${price}`;
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -181,7 +181,7 @@ export async function sendBookingCancellationEmail(details: BookingEmailDetails)
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
   const bookUrl = `${baseUrl}/${businessSlug}`;
   const nameDisplay = customerName || "Valued Customer";
-  const priceDisplay = typeof price === "number" ? `$${price.toFixed(2)}` : `$${price}`;
+  const priceDisplay = typeof price === "number" ? `₹${price.toFixed(2)}` : `₹${price}`;
 
   const htmlContent = `
     <!DOCTYPE html>

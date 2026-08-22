@@ -188,8 +188,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-slate-50 dark:bg-slate-950 overflow-hidden">
-      {/* Subtle Background Mesh Glow */}
-      <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 h-[500px] w-[600px] rounded-full bg-brand-500/10 blur-[120px] dark:bg-brand-500/20" />
+      {/* Subtle Animated Background Mesh Glow */}
+      <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 h-[500px] w-[600px] rounded-full bg-brand-500/10 blur-[120px] dark:bg-brand-500/20 animate-glow-float" />
 
       <Suspense fallback={<div className="text-center text-slate-500">Loading form...</div>}>
         <LoginForm />
