@@ -17,15 +17,39 @@ CREATE TABLE "users" (
 );
 
 -- CreateTable
+CREATE TABLE "password_reset_tokens" (
+    "id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expires_at" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "password_reset_tokens_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "businesses" (
     "id" TEXT NOT NULL,
     "owner_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
+    "address" TEXT,
     "timezone" TEXT NOT NULL DEFAULT 'UTC',
     "slug" TEXT NOT NULL,
+    "latitude" DOUBLE PRECISION,
+    "longitude" DOUBLE PRECISION,
 
     CONSTRAINT "businesses_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "business_images" (
+    "id" TEXT NOT NULL,
+    "business_id" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "business_images_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -36,6 +60,7 @@ CREATE TABLE "services" (
     "duration_minutes" INTEGER NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
     "buffer_minutes" INTEGER NOT NULL DEFAULT 0,
+    "gst_number" TEXT,
 
     CONSTRAINT "services_pkey" PRIMARY KEY ("id")
 );
@@ -81,10 +106,22 @@ CREATE TABLE "bookings" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "password_reset_tokens_token_key" ON "password_reset_tokens"("token");
+
+-- CreateIndex
+CREATE INDEX "password_reset_tokens_user_id_idx" ON "password_reset_tokens"("user_id");
+
+-- CreateIndex
+CREATE INDEX "password_reset_tokens_token_idx" ON "password_reset_tokens"("token");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "businesses_slug_key" ON "businesses"("slug");
 
 -- CreateIndex
 CREATE INDEX "businesses_owner_id_idx" ON "businesses"("owner_id");
+
+-- CreateIndex
+CREATE INDEX "business_images_business_id_idx" ON "business_images"("business_id");
 
 -- CreateIndex
 CREATE INDEX "services_business_id_idx" ON "services"("business_id");
@@ -105,10 +142,16 @@ CREATE INDEX "bookings_customer_id_idx" ON "bookings"("customer_id");
 CREATE UNIQUE INDEX "bookings_business_id_start_at_key" ON "bookings"("business_id", "start_at");
 
 -- AddForeignKey
+ALTER TABLE "password_reset_tokens" ADD CONSTRAINT "password_reset_tokens_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "businesses" ADD CONSTRAINT "businesses_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "services" ADD CONSTRAINT "services_business_id_fkey" FOREIGN KEY ("service_id") REFERENCES "services"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "business_images" ADD CONSTRAINT "business_images_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "businesses"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "services" ADD CONSTRAINT "services_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "businesses"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "availabilities" ADD CONSTRAINT "availabilities_business_id_fkey" FOREIGN KEY ("business_id") REFERENCES "businesses"("id") ON DELETE CASCADE ON UPDATE CASCADE;
