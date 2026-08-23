@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createBookingAction } from "@/app/actions/booking";
 
@@ -11,10 +11,88 @@ interface BookFormProps {
   startAt: string;
   businessSlug: string;
   businessName: string;
+  businessTimezone: string;
   serviceName: string;
   price: number;
   durationMinutes: number;
   formattedTime: string;
+}
+
+function BookingConfirmationTime({
+  startAt,
+  durationMinutes,
+  businessTimezone,
+}: {
+  startAt: string;
+  durationMinutes: number;
+  businessTimezone: string;
+}) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const startDate = new Date(startAt);
+  const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
+
+  if (!mounted) {
+    const fallbackDateStr = new Intl.DateTimeFormat("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: businessTimezone,
+    }).format(startDate);
+
+    const fallbackStartTime = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: businessTimezone,
+    }).format(startDate);
+
+    const fallbackEndTime = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: businessTimezone,
+    }).format(endDate);
+
+    return (
+      <span>
+        {fallbackDateStr} • {fallbackStartTime} - {fallbackEndTime} ({businessTimezone})
+      </span>
+    );
+  }
+
+  const browserTimezone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || businessTimezone;
+
+  const localDateStr = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(startDate);
+
+  const localStartTime = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(startDate);
+
+  const localEndTime = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(endDate);
+
+  return (
+    <span>
+      {localDateStr} • {localStartTime} - {localEndTime} ({browserTimezone})
+    </span>
+  );
 }
 
 export default function BookForm({
@@ -24,10 +102,10 @@ export default function BookForm({
   startAt,
   businessSlug,
   businessName,
+  businessTimezone,
   serviceName,
   price,
   durationMinutes,
-  formattedTime,
 }: BookFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -153,7 +231,11 @@ export default function BookForm({
           <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
             <dt className="text-gray-500 dark:text-gray-400">Time</dt>
             <dd className="font-semibold text-blue-600 dark:text-blue-400">
-              {formattedTime}
+              <BookingConfirmationTime
+                startAt={startAt}
+                durationMinutes={durationMinutes}
+                businessTimezone={businessTimezone}
+              />
             </dd>
           </div>
           <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">

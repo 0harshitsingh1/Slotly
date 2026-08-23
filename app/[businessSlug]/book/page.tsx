@@ -89,6 +89,7 @@ export default async function BookPage({ params, searchParams }: BookPageProps) 
           startAt={startDate.toISOString()}
           businessSlug={businessSlug}
           businessName={business.name}
+          businessTimezone={business.timezone}
           serviceName={service.name}
           price={service.price}
           durationMinutes={service.duration_minutes}

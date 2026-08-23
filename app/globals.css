@@ -59,7 +59,7 @@
   /* Custom Elevation & Shadows */
   --shadow-subtle: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-  --shadow-card-hover: 0 12px 30px -5px rgb(79 70 229 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  --shadow-card-hover: 0 12px 30px -5px rgb(79 70 229 / 0.12), 0 8px 10px -6px rgb(0 0 0 / 0.04);
   --shadow-dropdown: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.08);
 
   /* Border Radii */
@@ -91,6 +91,29 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Headings Typography Hierarchy */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+/* Page Enter Smooth Transition Animation */
+@keyframes fadeInPage {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: fadeInPage 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
 /* Performant Ambient Background Animations */
 @keyframes glowFloat {
   0%, 100% {
@@ -98,7 +121,7 @@ body {
     opacity: 0.85;
   }
   50% {
-    transform: translate3d(24px, -18px, 0) scale(1.06);
+    transform: translate3d(24px, -18px, 0) scale(1.08);
     opacity: 1;
   }
 }
@@ -109,7 +132,7 @@ body {
     opacity: 0.75;
   }
   50% {
-    transform: translate3d(-20px, 20px, 0) scale(1.05);
+    transform: translate3d(-20px, 20px, 0) scale(1.06);
     opacity: 0.95;
   }
 }
@@ -127,7 +150,8 @@ body {
 /* Accessibility: Respect Reduced Motion Settings */
 @media (prefers-reduced-motion: reduce) {
   .animate-glow-float,
-  .animate-glow-float-alt {
+  .animate-glow-float-alt,
+  .animate-page-enter {
     animation: none !important;
     transform: none !important;
   }

@@ -10,6 +10,9 @@ export const metadata = {
 export default async function BusinessesDirectoryPage() {
   const businesses = await db.business.findMany({
     include: {
+      images: {
+        orderBy: { created_at: "asc" },
+      },
       services: {
         select: {
           id: true,

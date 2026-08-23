@@ -101,6 +101,12 @@ export function HeaderClient({ user }: HeaderClientProps) {
             >
               Explore Businesses
             </Link>
+            <Link
+              href="/about"
+              className="text-sm font-medium text-slate-600 hover:text-brand-600 transition dark:text-slate-400 dark:hover:text-brand-400"
+            >
+              About
+            </Link>
           </nav>
         </div>
 
@@ -208,6 +214,17 @@ export function HeaderClient({ user }: HeaderClientProps) {
                       </svg>
                       Explore Businesses
                     </Link>
+
+                    <Link
+                      href="/support"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                    >
+                      <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      Support
+                    </Link>
                   </div>
 
                   <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
@@ -273,6 +290,13 @@ export function HeaderClient({ user }: HeaderClientProps) {
             >
               🔍 Explore Businesses
             </Link>
+            <Link
+              href="/about"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              ℹ️ About Slotly
+            </Link>
 
             {user && (
               <>
@@ -289,6 +313,13 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                   ⚙️ Profile Settings
+                </Link>
+                <Link
+                  href="/support"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  🎧 Customer Support
                 </Link>
               </>
             )}
