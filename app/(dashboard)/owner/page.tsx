@@ -33,7 +33,12 @@ function formatDate(date: Date, timezone?: string): string {
   }
 }
 
-export default async function OwnerDashboardPage() {
+interface OwnerDashboardPageProps {
+  searchParams?: Promise<{ error?: string }>;
+}
+
+export default async function OwnerDashboardPage({ searchParams }: OwnerDashboardPageProps) {
+  const { error } = (await searchParams) || {};
   const session = await auth();
 
   if (!session?.user || session.user.role !== "OWNER") {
@@ -123,12 +128,16 @@ export default async function OwnerDashboardPage() {
   ];
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-[#051424] text-slate-100 px-4 py-8 sm:px-6 lg:px-8 overflow-hidden font-sans">
-      {/* Operational Owner Ambient Mesh Glow Background (Stitch Design) */}
-      <div className="pointer-events-none absolute -top-36 right-0 h-[600px] w-[700px] rounded-full bg-brand-500/10 blur-[140px] animate-glow-float" />
-      <div className="pointer-events-none absolute -bottom-36 -left-20 h-[500px] w-[500px] rounded-full bg-slate-400/10 blur-[140px] animate-glow-float-alt" />
+    <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
+      {error === "owner_booking_disabled" && (
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 text-amber-200 flex items-center gap-3 backdrop-blur-xl shadow-md">
+          <span className="text-xl">⚠️</span>
+          <p className="text-xs sm:text-sm leading-relaxed">
+            <strong>Access Restricted:</strong> Business owners cannot book client appointments or access customer directory pages. You have been redirected to your Owner Dashboard.
+          </p>
+        </div>
+      )}
 
-      <div className="relative z-10 mx-auto max-w-7xl space-y-8">
         {/* Dashboard Overview Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-white/10 bg-[#161b22]/90 p-6 sm:p-8 shadow-[0_12px_48px_rgba(139,92,246,0.12)] backdrop-blur-xl">
           <div className="space-y-1">
@@ -362,7 +371,6 @@ export default async function OwnerDashboardPage() {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }

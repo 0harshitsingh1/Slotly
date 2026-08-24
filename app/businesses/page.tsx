@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import BusinessDirectoryClient from "./BusinessDirectoryClient";
 
@@ -8,6 +10,12 @@ export const metadata = {
 };
 
 export default async function BusinessesDirectoryPage() {
+  const session = await auth();
+
+  if (session?.user?.role === "OWNER") {
+    redirect("/owner?error=owner_booking_disabled");
+  }
+
   const businesses = await db.business.findMany({
     include: {
       images: {

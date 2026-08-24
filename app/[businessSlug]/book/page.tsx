@@ -28,6 +28,11 @@ export default async function BookPage({ params, searchParams }: BookPageProps) 
     redirect(`/login?callbackUrl=${callbackUrl}`);
   }
 
+  // Business owners cannot book client appointments
+  if (session.user.role === "OWNER") {
+    redirect("/owner?error=owner_booking_disabled");
+  }
+
   if (!serviceId || !startAtStr) {
     redirect(`/${businessSlug}`);
   }

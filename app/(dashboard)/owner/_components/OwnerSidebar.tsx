@@ -43,6 +43,12 @@ const ownerNavItems: OwnerNavItem[] = [
     matchPrefixes: ["/owner/bookings"],
     icon: "🎟️",
   },
+  {
+    name: "Analytics",
+    href: "/owner/analytics",
+    matchPrefixes: ["/owner/analytics"],
+    icon: "📈",
+  },
 ];
 
 export function OwnerSidebar() {
