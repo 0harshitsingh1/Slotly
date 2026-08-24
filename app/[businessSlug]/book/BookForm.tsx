@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createBookingAction } from "@/app/actions/booking";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface BookFormProps {
   businessId: string;
@@ -134,76 +135,103 @@ export default function BookForm({
     }
   };
 
+  // State 2: Booking Confirmed Success View (Stitch Design)
   if (confirmedBookingId) {
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50/50 p-8 text-center shadow-sm dark:border-green-900/60 dark:bg-green-950/30">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/60 text-green-600 dark:text-green-300">
-          <svg
-            className="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
+      <div className="bg-[#161b22]/90 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-[0_12px_48px_rgba(139,92,246,0.18)] flex flex-col items-center text-center relative overflow-hidden space-y-6">
+        {/* Top Accent Line */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-400 to-indigo-500" />
+
+        {/* Animated Checkmark Icon Tile */}
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-brand-500/20 flex items-center justify-center border border-brand-500/30 text-brand-300 shadow-[0_0_20px_rgba(160,120,255,0.3)] animate-pulse mb-1">
+          <svg className="h-8 w-8 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-2xl font-extrabold text-green-900 dark:text-green-100">
-          Booking Confirmed!
-        </h2>
-        <p className="mt-2 text-sm text-green-700 dark:text-green-300">
-          Your appointment for <span className="font-semibold">{serviceName}</span> with{" "}
-          <span className="font-semibold">{businessName}</span> has been confirmed.
-        </p>
-        <div className="mt-4 inline-block rounded-md bg-white px-4 py-2 text-xs font-mono text-gray-700 shadow-sm dark:bg-gray-900 dark:text-gray-300 border border-green-200 dark:border-green-800">
-          Booking ID: {confirmedBookingId}
+
+        <div className="space-y-1">
+          <h2 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-100 dark:text-white">
+            Booking Confirmed!
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400">
+            Your appointment has been successfully scheduled.
+          </p>
         </div>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/customer"
-            className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-          >
-            View Dashboard
+
+        {/* Reference ID Pill Badge */}
+        <div className="inline-flex items-center gap-2 bg-[#273647]/60 px-4 py-1.5 rounded-full border border-white/10 text-xs font-bold text-slate-300">
+          <span className="text-slate-400 uppercase">REF ID</span>
+          <span className="font-mono text-brand-400 tracking-wider">#{confirmedBookingId.slice(-8)}</span>
+        </div>
+
+        {/* Reservation Details Bento Box */}
+        <div className="w-full bg-[#122131]/90 rounded-2xl border border-white/10 p-5 overflow-hidden text-left space-y-4 shadow-md">
+          <div className="border-b border-white/10 pb-3">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-400">Business</span>
+            <h3 className="font-heading font-extrabold text-slate-100 text-base sm:text-lg">
+              {businessName}
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <span className="text-slate-400 block font-medium">Service</span>
+              <span className="font-extrabold text-slate-200 block text-sm">{serviceName}</span>
+              <span className="text-slate-400">⏱️ {durationMinutes} min</span>
+            </div>
+
+            <div>
+              <span className="text-slate-400 block font-medium">Total Paid</span>
+              <span className="font-heading font-extrabold text-brand-400 text-sm block">₹{price.toFixed(2)}</span>
+              <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[#10B981]/20 text-[#10B981] text-[10px] font-bold">
+                ✓ Confirmed
+              </span>
+            </div>
+
+            <div className="sm:col-span-2 pt-2 border-t border-white/10">
+              <span className="text-slate-400 block font-medium">Date & Time</span>
+              <span className="font-bold text-slate-100">
+                <BookingConfirmationTime
+                  startAt={startAt}
+                  durationMinutes={durationMinutes}
+                  businessTimezone={businessTimezone}
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="w-full flex flex-col sm:flex-row gap-3 pt-2">
+          <Link href="/customer" className="w-full">
+            <button className="w-full rounded-full bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white font-heading font-extrabold text-xs sm:text-sm py-3 px-6 transition-all duration-300 shadow-[0_0_20px_rgba(160,120,255,0.3)] flex items-center justify-center gap-2">
+              <span>View Dashboard</span>
+              <span>→</span>
+            </button>
           </Link>
-          <Link
-            href={`/${businessSlug}`}
-            className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-          >
-            Book Another
+          <Link href={`/${businessSlug}`} className="w-full">
+            <button className="w-full rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-slate-200 font-heading font-extrabold text-xs sm:text-sm py-3 px-6 transition-all flex items-center justify-center gap-2">
+              <span>Book Another</span>
+            </button>
           </Link>
         </div>
       </div>
     );
   }
 
+  // State 1: Review & Confirm Booking Form View (Stitch Design)
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+        <div className="rounded-xl border border-danger-500/30 bg-danger-950/40 p-4 text-xs font-semibold text-danger-300 space-y-2">
           <div className="flex items-center gap-2">
-            <svg
-              className="h-5 w-5 text-red-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span className="font-semibold">{error}</span>
+            <span>⚠️</span>
+            <span>{error}</span>
           </div>
-          <div className="mt-3">
+          <div>
             <Link
               href={`/${businessSlug}`}
-              className="inline-block text-xs font-semibold underline hover:text-red-900 dark:hover:text-red-100"
+              className="inline-block font-semibold text-brand-400 hover:underline text-xs"
             >
               Return to available slots
             </Link>
@@ -211,56 +239,79 @@ export default function BookForm({
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-          Reservation Summary
-        </h3>
-        <dl className="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
-          <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
-            <dt className="text-gray-500 dark:text-gray-400">Business</dt>
-            <dd className="font-semibold text-gray-900 dark:text-gray-100">
-              {businessName}
-            </dd>
+      {/* Glassmorphic Reservation Summary Card */}
+      <div className="bg-[#161b22]/90 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-[0_12px_48px_rgba(139,92,246,0.18)] relative overflow-hidden space-y-6">
+        {/* Top Accent Line */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-400 to-indigo-500" />
+
+        <div className="space-y-1 text-center">
+          <h2 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-100 dark:text-white">
+            Confirm Booking
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400">
+            Review reservation details below to complete your booking.
+          </p>
+        </div>
+
+        {/* Bento Box Summary Details */}
+        <div className="w-full bg-[#122131]/90 rounded-2xl border border-white/10 p-5 overflow-hidden space-y-4 shadow-md">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Business</span>
+            <span className="font-heading font-extrabold text-slate-100 text-sm sm:text-base">{businessName}</span>
           </div>
-          <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
-            <dt className="text-gray-500 dark:text-gray-400">Service</dt>
-            <dd className="font-semibold text-gray-900 dark:text-gray-100">
+
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Service</span>
+            <span className="font-heading font-extrabold text-slate-100 text-sm sm:text-base">
               {serviceName} ({durationMinutes} min)
-            </dd>
+            </span>
           </div>
-          <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
-            <dt className="text-gray-500 dark:text-gray-400">Time</dt>
-            <dd className="font-semibold text-blue-600 dark:text-blue-400">
+
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Time</span>
+            <span className="font-bold text-brand-400 text-xs sm:text-sm text-right">
               <BookingConfirmationTime
                 startAt={startAt}
                 durationMinutes={durationMinutes}
                 businessTimezone={businessTimezone}
               />
-            </dd>
+            </span>
           </div>
-          <div className="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
-            <dt className="text-gray-500 dark:text-gray-400">Total Price</dt>
-            <dd className="font-extrabold text-gray-900 dark:text-gray-100">
-              ₹{price.toFixed(2)}
-            </dd>
-          </div>
-        </dl>
-      </div>
 
-      <div className="flex items-center justify-between gap-4">
-        <Link
-          href={`/${businessSlug}`}
-          className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-        >
-          Cancel
-        </Link>
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
-        >
-          {loading ? "Confirming..." : "Confirm & Book Now"}
-        </button>
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Price</span>
+            <span className="font-heading text-lg sm:text-xl font-extrabold text-brand-400">
+              ₹{price.toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        {/* Form Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+          <Link href={`/${businessSlug}`} className="w-full sm:w-auto">
+            <button
+              type="button"
+              className="w-full sm:w-auto rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 font-heading font-extrabold text-xs sm:text-sm py-3 px-6 transition-all"
+            >
+              Cancel
+            </button>
+          </Link>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full sm:w-auto rounded-full bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white font-heading font-extrabold text-xs sm:text-sm py-3 px-8 transition-all duration-300 shadow-[0_0_20px_rgba(160,120,255,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <Spinner size="sm" />
+            ) : (
+              <>
+                <span>Confirm &amp; Book Now</span>
+                <span>→</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </form>
   );

@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { Card, CardContent } from "@/components/ui/Card";
 import { Badge, BadgeVariant } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 
@@ -124,140 +123,147 @@ export default async function OwnerDashboardPage() {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-8">
-        {/* Dashboard Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="relative min-h-[calc(100vh-4rem)] bg-[#051424] text-slate-100 px-4 py-8 sm:px-6 lg:px-8 overflow-hidden font-sans">
+      {/* Operational Owner Ambient Mesh Glow Background (Stitch Design) */}
+      <div className="pointer-events-none absolute -top-36 right-0 h-[600px] w-[700px] rounded-full bg-brand-500/10 blur-[140px] animate-glow-float" />
+      <div className="pointer-events-none absolute -bottom-36 -left-20 h-[500px] w-[500px] rounded-full bg-slate-400/10 blur-[140px] animate-glow-float-alt" />
+
+      <div className="relative z-10 mx-auto max-w-7xl space-y-8">
+        {/* Dashboard Overview Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-white/10 bg-[#161b22]/90 p-6 sm:p-8 shadow-[0_12px_48px_rgba(139,92,246,0.12)] backdrop-blur-xl">
           <div className="space-y-1">
-            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Owner Dashboard
+            <h1 className="font-heading text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-100 dark:text-white">
+              Dashboard Overview
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Welcome back, <span className="font-semibold text-slate-700 dark:text-slate-200">{session.user.email}</span>
+            <p className="text-xs sm:text-sm text-slate-400">
+              Welcome back, <span className="font-semibold text-brand-300">{session.user.email}</span> • Here is what is happening with your business today.
             </p>
           </div>
 
           {business ? (
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
               <Link href={`/${business.slug}`} target="_blank">
-                <Button variant="outline" size="sm">
+                <button className="rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-slate-200 font-heading font-extrabold text-xs px-4 py-2.5 transition-all">
                   View Public Page ↗
-                </Button>
+                </button>
               </Link>
               <Link href="/owner/business/edit">
-                <Button variant="primary" size="sm">
+                <button className="rounded-full bg-brand-500 hover:bg-brand-600 text-white font-heading font-extrabold text-xs px-4 py-2.5 shadow-[0_0_20px_rgba(160,120,255,0.3)] transition-all">
                   ✏️ Edit Profile
-                </Button>
+                </button>
               </Link>
             </div>
           ) : (
             <Link href="/owner/business/new">
-              <Button variant="primary" size="sm">
+              <button className="rounded-full bg-brand-500 hover:bg-brand-600 text-white font-heading font-extrabold text-xs px-5 py-2.5 shadow-[0_0_20px_rgba(160,120,255,0.3)] transition-all">
                 + Create Business Profile
-              </Button>
+              </button>
             </Link>
           )}
         </div>
 
         {/* Business Header Banner if business exists */}
         {business && (
-          <div className="rounded-xl border border-brand-100 bg-brand-50/50 p-4 dark:border-brand-900/50 dark:bg-brand-950/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="rounded-2xl border border-brand-500/30 bg-brand-500/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-md">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">🏬</span>
+              <span className="text-3xl">🏬</span>
               <div>
-                <span className="font-heading font-bold text-slate-900 dark:text-white text-base">
+                <span className="font-heading font-extrabold text-slate-100 text-base sm:text-lg">
                   {business.name}
                 </span>
-                <span className="ml-2 text-xs font-semibold text-brand-700 dark:text-brand-300">
+                <span className="ml-2 text-xs font-bold text-brand-300">
                   /{business.slug}
                 </span>
                 {business.address && (
-                  <p className="text-xs text-slate-600 dark:text-slate-400 truncate max-w-md">
+                  <p className="text-xs text-slate-300 truncate max-w-md mt-0.5">
                     📍 {business.address}
                   </p>
                 )}
               </div>
             </div>
+            <div className="text-xs text-slate-400">
+              Operating Timezone: <strong className="text-slate-200">{business.timezone}</strong>
+            </div>
           </div>
         )}
 
-        {/* Metrics Summary Cards */}
+        {/* Summary Bento Grid Metrics Cards (Stitch Design) */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          {/* Card 1: Total Bookings */}
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Total Bookings
-                </span>
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950/60 dark:text-brand-400 text-lg">
-                  📊
-                </span>
-              </div>
-              <div className="mt-4">
-                <p className="font-heading text-3xl font-extrabold text-slate-900 dark:text-white">
-                  {totalBookings}
-                </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Lifetime client reservations
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Card 1: Total Revenue */}
+          <div className="rounded-2xl border border-white/10 bg-[#161b22] p-6 shadow-md relative overflow-hidden flex flex-col justify-between group">
+            <div className="absolute -right-4 -top-4 w-28 h-28 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-500/20 transition-all pointer-events-none" />
+            <div className="flex items-center justify-between z-10">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Total Revenue
+              </span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#273647] text-brand-400 text-lg border border-white/5">
+                💳
+              </span>
+            </div>
+            <div className="mt-4 z-10">
+              <p className="font-heading text-3xl font-extrabold text-slate-100">
+                {formatCurrency(totalRevenue)}
+              </p>
+              <p className="mt-1 text-xs text-brand-400 font-semibold flex items-center gap-1">
+                <span>📈</span> Sum of confirmed booking payments
+              </p>
+            </div>
+          </div>
 
-          {/* Card 2: Upcoming Bookings */}
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Upcoming Bookings
-                </span>
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-success-50 text-success-600 dark:bg-success-950/60 dark:text-success-400 text-lg">
-                  📅
-                </span>
-              </div>
-              <div className="mt-4">
-                <p className="font-heading text-3xl font-extrabold text-slate-900 dark:text-white">
-                  {upcomingBookings}
-                </p>
-                <p className="mt-1 text-xs text-success-600 dark:text-success-400 font-medium">
-                  Active scheduled appointments
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Card 2: Total Bookings */}
+          <div className="rounded-2xl border border-white/10 bg-[#161b22] p-6 shadow-md relative overflow-hidden flex flex-col justify-between group">
+            <div className="absolute -right-4 -top-4 w-28 h-28 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all pointer-events-none" />
+            <div className="flex items-center justify-between z-10">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Total Bookings
+              </span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#273647] text-indigo-400 text-lg border border-white/5">
+                📊
+              </span>
+            </div>
+            <div className="mt-4 z-10">
+              <p className="font-heading text-3xl font-extrabold text-slate-100">
+                {totalBookings}
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                Lifetime client reservations
+              </p>
+            </div>
+          </div>
 
-          {/* Card 3: Total Revenue */}
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Confirmed Revenue
-                </span>
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-info-50 text-info-600 dark:bg-info-950/60 dark:text-info-400 text-lg">
-                  💰
-                </span>
-              </div>
-              <div className="mt-4">
-                <p className="font-heading text-3xl font-extrabold text-slate-900 dark:text-white">
-                  {formatCurrency(totalRevenue)}
-                </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Sum of confirmed booking prices
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Card 3: Upcoming Today / Active */}
+          <div className="rounded-2xl border border-brand-500/30 bg-brand-500/10 p-6 shadow-md relative overflow-hidden flex flex-col justify-between group">
+            <div className="absolute right-0 bottom-0 w-32 h-32 bg-brand-500/10 rounded-tl-full blur-2xl pointer-events-none" />
+            <div className="flex items-center justify-between z-10">
+              <span className="text-xs font-bold uppercase tracking-wider text-brand-300">
+                Upcoming Appointments
+              </span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/20 text-brand-300 text-lg border border-brand-500/30">
+                📅
+              </span>
+            </div>
+            <div className="mt-4 z-10">
+              <p className="font-heading text-3xl font-extrabold text-white">
+                {upcomingBookings}
+              </p>
+              <p className="mt-1 text-xs text-brand-300 font-semibold">
+                Active scheduled reservations
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Management Navigation Cards */}
+        {/* Business Management Navigation Cards (Stitch Design) */}
         <div className="space-y-4">
-          <h2 className="font-heading text-lg font-bold text-slate-900 dark:text-white">
+          <h2 className="font-heading text-xl font-extrabold text-slate-100">
             Business Management
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {navCards.map((item) => (
-              <Card key={item.title} hoverable className="flex flex-col justify-between p-5">
+              <div
+                key={item.title}
+                className="group flex flex-col justify-between rounded-2xl border border-white/10 bg-[#161b22] p-5 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/40 hover:shadow-xl hover:shadow-brand-500/10"
+              >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-2xl">{item.icon}</span>
@@ -266,58 +272,70 @@ export default async function OwnerDashboardPage() {
                     </Badge>
                   </div>
                   <div>
-                    <h3 className="font-heading font-bold text-slate-900 dark:text-white text-base">
+                    <h3 className="font-heading font-extrabold text-slate-100 text-base group-hover:text-brand-300 transition-colors">
                       {item.title}
                     </h3>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                    <p className="mt-1 text-xs text-slate-400 line-clamp-2">
                       {item.description}
                     </p>
                   </div>
                 </div>
-                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <Link href={item.href}>
-                    <Button variant="ghost" size="sm" className="w-full justify-between">
+                <div className="mt-4 pt-3 border-t border-white/10">
+                  <Link href={item.href} className="block">
+                    <button className="w-full rounded-full bg-white/5 border border-white/10 hover:bg-brand-500 hover:text-white text-slate-300 font-extrabold text-xs py-2 px-3 transition-all flex items-center justify-between">
                       <span>Manage</span>
                       <span>→</span>
-                    </Button>
+                    </button>
                   </Link>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Recent Bookings Preview List */}
+        {/* Recent Bookings Preview List (Stitch Design) */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-heading text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <h2 className="font-heading text-xl font-extrabold text-slate-100 flex items-center gap-2">
               <span>Recent Bookings</span>
-              <Badge variant="neutral">{recentBookings.length}</Badge>
+              <span className="rounded-full bg-[#273647] px-2.5 py-0.5 text-xs font-bold text-slate-300 border border-white/5">
+                {recentBookings.length}
+              </span>
             </h2>
             <Link href="/owner/bookings">
-              <Button variant="ghost" size="sm">
+              <button className="text-xs font-bold text-brand-400 hover:text-brand-300 transition-colors">
                 View All Bookings →
-              </Button>
+              </button>
             </Link>
           </div>
 
           {recentBookings.length > 0 ? (
-            <Card>
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {recentBookings.map((b) => (
+            <div className="rounded-2xl border border-white/10 bg-[#161b22] shadow-md overflow-hidden divide-y divide-white/10">
+              {recentBookings.map((b) => {
+                const statusColor =
+                  b.status === "CONFIRMED"
+                    ? "bg-[#10B981]"
+                    : b.status === "CANCELLED"
+                    ? "bg-slate-600"
+                    : "bg-brand-400";
+
+                return (
                   <div
                     key={b.id}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-3 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition"
+                    className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between p-5 gap-3 hover:bg-[#273647]/40 transition-colors pl-6"
                   >
+                    {/* Status Accent Strip */}
+                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${statusColor}`} />
+
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-900 dark:text-white">
+                        <span className="font-heading font-extrabold text-sm sm:text-base text-slate-100">
                           {b.service?.name || "Service"}
                         </span>
                         <Badge status={b.status as any} size="sm" />
                       </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">
-                        Customer: <span className="font-medium text-slate-900 dark:text-slate-200">{b.customer?.name || b.customer?.email}</span> ({b.customer?.email})
+                      <p className="text-xs text-slate-300">
+                        Customer: <span className="font-semibold text-slate-100">{b.customer?.name || b.customer?.email}</span> ({b.customer?.email})
                       </p>
                       <p className="text-[11px] text-slate-400">
                         🕒 {formatDate(b.start_at, business?.timezone)}
@@ -325,23 +343,23 @@ export default async function OwnerDashboardPage() {
                     </div>
 
                     <div className="text-left sm:text-right shrink-0">
-                      <p className="font-heading font-extrabold text-sm text-slate-900 dark:text-white">
+                      <p className="font-heading font-extrabold text-base text-brand-400">
                         {formatCurrency(b.service?.price || 0)}
                       </p>
                       <p className="text-[11px] text-slate-400">
-                        {b.service?.duration_minutes} min
+                        {b.service?.duration_minutes} min duration
                       </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </Card>
+                );
+              })}
+            </div>
           ) : (
-            <Card className="p-8 text-center border-dashed">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+            <div className="rounded-2xl border border-dashed border-white/10 bg-[#161b22]/50 p-8 text-center">
+              <p className="text-xs sm:text-sm text-slate-400">
                 No customer bookings recorded yet. Share your business page URL to start accepting reservations!
               </p>
-            </Card>
+            </div>
           )}
         </div>
       </div>

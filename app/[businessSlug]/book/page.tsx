@@ -65,21 +65,18 @@ export default async function BookPage({ params, searchParams }: BookPageProps) 
   }).format(startDate);
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-10 dark:bg-gray-900">
-      <div className="mx-auto max-w-xl space-y-6">
+    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-8 sm:py-12 bg-[#051424] text-slate-100 overflow-hidden font-sans">
+      {/* Atmospheric Background Glows (Stitch Design) */}
+      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] sm:w-[600px] h-[500px] sm:h-[600px] bg-brand-500/10 rounded-full blur-[120px] -z-10 animate-glow-float" />
+
+      <main className="w-full max-w-[600px] relative z-10 space-y-4">
         <div>
           <Link
             href={`/${businessSlug}`}
-            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+            className="text-xs font-semibold text-brand-400 hover:text-brand-300 transition-colors inline-flex items-center gap-1"
           >
-            ← Back to available slots
+            <span>←</span> Back to available slots
           </Link>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-            Confirm Booking
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Review details below to complete your appointment reservation.
-          </p>
         </div>
 
         <BookForm
@@ -95,7 +92,7 @@ export default async function BookPage({ params, searchParams }: BookPageProps) 
           durationMinutes={service.duration_minutes}
           formattedTime={formattedTime}
         />
-      </div>
+      </main>
     </div>
   );
 }

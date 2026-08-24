@@ -26,26 +26,26 @@ export default async function BusinessesDirectoryPage() {
   });
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Consumer-Facing Ambient Mesh Glow Background */}
-      <div className="pointer-events-none absolute -top-36 left-0 h-[600px] w-[700px] rounded-full bg-sky-400/10 blur-[140px] dark:bg-sky-500/15" />
-      <div className="pointer-events-none absolute -bottom-36 -right-20 h-[500px] w-[500px] rounded-full bg-purple-400/10 blur-[140px] dark:bg-purple-900/15" />
+    <div className="relative min-h-[calc(100vh-4rem)] bg-[#051424] text-slate-100 px-4 py-8 sm:px-6 lg:px-8 overflow-hidden font-sans">
+      {/* Consumer-Facing Ambient Mesh Glow Background (Stitch Design) */}
+      <div className="pointer-events-none absolute -top-36 left-0 h-[600px] w-[700px] rounded-full bg-brand-500/10 blur-[140px] animate-glow-float" />
+      <div className="pointer-events-none absolute -bottom-36 -right-20 h-[500px] w-[500px] rounded-full bg-indigo-500/10 blur-[140px] animate-glow-float-alt" />
 
       <div className="relative z-10 mx-auto max-w-6xl space-y-8">
         {/* Navigation & Header */}
-        <header className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+        <header className="rounded-2xl border border-white/10 bg-[#161b22]/90 p-6 sm:p-8 shadow-[0_12px_48px_rgba(139,92,246,0.12)] backdrop-blur-xl space-y-2">
           <div>
             <Link
               href="/"
-              className="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400"
+              className="text-xs font-semibold text-brand-400 hover:text-brand-300 transition-colors inline-flex items-center gap-1 mb-2"
             >
-              ← Back to Home
+              <span>←</span> Back to Home
             </Link>
-            <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
-              Business Directory
+            <h1 className="font-heading text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-100 dark:text-white">
+              Discover Services
             </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Discover local service providers and book appointments in real time.
+            <p className="mt-1 text-xs sm:text-sm text-slate-400">
+              Find and book appointments with top-rated local service providers in real time.
             </p>
           </div>
         </header>
