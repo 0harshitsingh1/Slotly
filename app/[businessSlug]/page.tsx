@@ -4,6 +4,7 @@ import Image from "next/image";
 import { db } from "@/lib/db";
 import { getAvailableSlots } from "@/lib/slots/getAvailableSlots";
 import BookingControls from "./BookingControls";
+import { Clock, MapPin, CheckCircle } from "lucide-react";
 
 interface BusinessBookingPageProps {
   params: Promise<{
@@ -124,11 +125,17 @@ export default async function BusinessBookingPage({
                 {business.name}
               </h1>
               <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-300 font-medium">
-                <span>🕒 {business.timezone}</span>
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                  <span>{business.timezone}</span>
+                </span>
                 {business.address && (
                   <>
                     <span>•</span>
-                    <span className="truncate">📍 {business.address}</span>
+                    <span className="truncate flex items-center gap-1">
+                      <MapPin className="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                      <span>{business.address}</span>
+                    </span>
                   </>
                 )}
                 <span>•</span>
@@ -213,8 +220,9 @@ export default async function BusinessBookingPage({
                 {business.name}
               </h2>
               {business.address && (
-                <p className="text-xs sm:text-sm text-slate-300 z-10 mt-1">
-                  📍 {business.address}
+                <p className="text-xs sm:text-sm text-slate-300 z-10 mt-1 flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                  <span>{business.address}</span>
                 </p>
               )}
             </div>
@@ -270,14 +278,18 @@ export default async function BusinessBookingPage({
                                 {service.name}
                               </h3>
                               {isSelected && (
-                                <span className="rounded-full bg-brand-500/20 px-2 py-0.5 text-[10px] font-bold text-brand-300 border border-brand-500/30">
-                                  ✓ Selected
+                                <span className="rounded-full bg-brand-500/20 px-2 py-0.5 text-[10px] font-bold text-brand-300 border border-brand-500/30 flex items-center gap-1">
+                                  <CheckCircle className="h-3 w-3 text-brand-300 shrink-0" />
+                                  <span>Selected</span>
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-slate-400">
-                              ⏱️ {service.duration_minutes} min duration
-                              {service.buffer_minutes > 0 && ` (${service.buffer_minutes} min buffer)`}
+                            <p className="text-xs text-slate-400 flex items-center gap-1">
+                              <Clock className="h-3 w-3 text-slate-400 shrink-0" />
+                              <span>
+                                {service.duration_minutes} min duration
+                                {service.buffer_minutes > 0 && ` (${service.buffer_minutes} min buffer)`}
+                              </span>
                             </p>
                           </div>
 
@@ -310,7 +322,7 @@ export default async function BusinessBookingPage({
               </h2>
               {business.address ? (
                 <p className="text-xs sm:text-sm text-slate-300 flex items-start gap-2">
-                  <span className="mt-0.5">📍</span>
+                  <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
                   <span className="whitespace-pre-line leading-relaxed">{business.address}</span>
                 </p>
               ) : (

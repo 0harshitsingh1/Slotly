@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createBookingAction } from "@/app/actions/booking";
 import { Spinner } from "@/components/ui/Spinner";
+import { Clock, CheckCircle, AlertCircle } from "lucide-react";
 
 interface BookFormProps {
   businessId: string;
@@ -138,7 +139,7 @@ export default function BookForm({
   // State 2: Booking Confirmed Success View (Stitch Design)
   if (confirmedBookingId) {
     return (
-      <div className="bg-[#161b22]/90 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-[0_12px_48px_rgba(139,92,246,0.18)] flex flex-col items-center text-center relative overflow-hidden space-y-6">
+      <div className="bg-[#161b22]/90 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-[0_12px_48px_rgba(139,92,246,0.18)] flex flex-col items-center text-center relative overflow-hidden space-y-6 font-sans">
         {/* Top Accent Line */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-400 to-indigo-500" />
 
@@ -177,19 +178,23 @@ export default function BookForm({
             <div>
               <span className="text-slate-400 block font-medium">Service</span>
               <span className="font-extrabold text-slate-200 block text-sm">{serviceName}</span>
-              <span className="text-slate-400">⏱️ {durationMinutes} min</span>
+              <span className="text-slate-400 flex items-center gap-1 mt-0.5">
+                <Clock className="h-3 w-3 text-slate-400 shrink-0" />
+                <span>{durationMinutes} min</span>
+              </span>
             </div>
 
             <div>
               <span className="text-slate-400 block font-medium">Total Paid</span>
               <span className="font-heading font-extrabold text-brand-400 text-sm block">₹{price.toFixed(2)}</span>
-              <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[#10B981]/20 text-[#10B981] text-[10px] font-bold">
-                ✓ Confirmed
+              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-[#10B981]/20 text-[#10B981] text-[10px] font-bold">
+                <CheckCircle className="h-3 w-3 text-[#10B981] shrink-0" />
+                <span>Confirmed</span>
               </span>
             </div>
 
             <div className="sm:col-span-2 pt-2 border-t border-white/10">
-              <span className="text-slate-400 block font-medium">Date & Time</span>
+              <span className="text-slate-400 block font-medium">Date &amp; Time</span>
               <span className="font-bold text-slate-100">
                 <BookingConfirmationTime
                   startAt={startAt}
@@ -221,11 +226,11 @@ export default function BookForm({
 
   // State 1: Review & Confirm Booking Form View (Stitch Design)
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 font-sans">
       {error && (
         <div className="rounded-xl border border-danger-500/30 bg-danger-950/40 p-4 text-xs font-semibold text-danger-300 space-y-2">
           <div className="flex items-center gap-2">
-            <span>⚠️</span>
+            <AlertCircle className="h-4 w-4 text-danger-300 shrink-0" />
             <span>{error}</span>
           </div>
           <div>

@@ -4,6 +4,15 @@ import { auth } from "@/lib/auth";
 import db from "@/lib/db";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import {
+  Calendar,
+  Ticket,
+  CheckCircle,
+  Clock,
+  MapPin,
+  ClipboardList,
+  Plus,
+} from "lucide-react";
 
 export const metadata = {
   title: "Customer Dashboard — Slotly",
@@ -82,13 +91,14 @@ export default async function CustomerDashboardPage() {
             </Link>
             <Link href="/businesses">
               <button className="rounded-full bg-brand-500 hover:bg-brand-600 text-white font-heading font-extrabold text-xs px-5 py-2.5 shadow-[0_0_20px_rgba(160,120,255,0.3)] transition-all flex items-center gap-1.5">
-                <span>+</span> Book New
+                <Plus className="h-3.5 w-3.5" />
+                <span>Book New</span>
               </button>
             </Link>
           </div>
         </div>
 
-        {/* Summary Stats Grid (Stitch Design) */}
+        {/* Summary Stats Grid */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
           {/* Card 1: Upcoming Appointments */}
           <div className="rounded-2xl border border-white/10 bg-[#161b22] p-6 shadow-md relative overflow-hidden flex flex-col justify-between hover:-translate-y-1 transition-transform group">
@@ -96,8 +106,8 @@ export default async function CustomerDashboardPage() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Upcoming Appointments
               </span>
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/20 text-brand-300 text-lg border border-brand-500/30">
-                📅
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                <Calendar className="h-5 w-5" />
               </span>
             </div>
             <div className="mt-4">
@@ -116,8 +126,8 @@ export default async function CustomerDashboardPage() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Total Bookings Made
               </span>
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#273647] text-indigo-400 text-lg border border-white/5">
-                🎟️
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#273647] text-indigo-400 border border-white/5">
+                <Ticket className="h-5 w-5" />
               </span>
             </div>
             <div className="mt-4">
@@ -136,8 +146,8 @@ export default async function CustomerDashboardPage() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Confirmed Bookings
               </span>
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#10B981]/20 text-[#10B981] text-lg border border-[#10B981]/30">
-                ✓
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30">
+                <CheckCircle className="h-5 w-5" />
               </span>
             </div>
             <div className="mt-4">
@@ -151,7 +161,7 @@ export default async function CustomerDashboardPage() {
           </div>
         </div>
 
-        {/* CTA Banner: Book a New Appointment (Stitch Design) */}
+        {/* CTA Banner: Book a New Appointment */}
         <div className="rounded-2xl border border-brand-500/30 bg-gradient-to-r from-brand-500/10 via-indigo-500/10 to-slate-900 p-6 shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1">
             <h2 className="font-heading text-lg font-extrabold text-slate-100 flex items-center gap-2">
@@ -168,7 +178,7 @@ export default async function CustomerDashboardPage() {
           </Link>
         </div>
 
-        {/* Next Upcoming Booking Feature Card (Stitch Design) */}
+        {/* Next Upcoming Booking Feature Card */}
         {nextUpcoming && (
           <div className="space-y-3">
             <h2 className="font-heading text-xl font-extrabold text-slate-100">
@@ -190,14 +200,14 @@ export default async function CustomerDashboardPage() {
                     {nextUpcoming.service.name} ({nextUpcoming.service.duration_minutes} min)
                   </p>
                   <p className="text-xs text-slate-400 flex items-center gap-1.5">
-                    <span>🕒</span>
+                    <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                     <span className="font-medium text-slate-200">
                       {formatDate(nextUpcoming.start_at, nextUpcoming.business.timezone)}
                     </span>
                   </p>
                   {nextUpcoming.business.address && (
-                    <p className="text-xs text-slate-400 flex items-start gap-1">
-                      <span>📍</span>
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                       <span>{nextUpcoming.business.address}</span>
                     </p>
                   )}
@@ -220,7 +230,9 @@ export default async function CustomerDashboardPage() {
           <Link href="/customer/bookings" className="block">
             <div className="rounded-2xl border border-white/10 bg-[#161b22] p-5 shadow-md hover:border-brand-500/40 transition-all flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-2xl">📋</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/20 text-brand-300 border border-brand-500/30 shrink-0">
+                  <ClipboardList className="h-5 w-5" />
+                </div>
                 <div>
                   <h3 className="font-heading font-extrabold text-slate-100 text-base">
                     View Complete Booking History

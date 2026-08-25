@@ -4,6 +4,13 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
+import {
+  Search,
+  MapPin,
+  Clock,
+  Building2,
+  AlertCircle,
+} from "lucide-react";
 
 interface ServiceItem {
   id: string;
@@ -161,13 +168,13 @@ export default function BusinessDirectoryClient({
 
   return (
     <div className="space-y-8">
-      {/* Bento Grid Search Bar & Controls (Stitch Design) */}
+      {/* Bento Grid Search Bar & Controls */}
       <div className="rounded-2xl border border-white/10 bg-[#161b22]/90 p-5 sm:p-6 shadow-[0_12px_48px_rgba(139,92,246,0.12)] backdrop-blur-xl space-y-4">
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Text Filter Input */}
           <div className="relative flex-1">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-              🔍
+              <Search className="h-4 w-4" />
             </div>
             <input
               type="text"
@@ -192,7 +199,8 @@ export default function BusinessDirectoryClient({
               onClick={handleClearNearMe}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-500/40 bg-brand-500/10 px-5 py-2.5 text-xs font-extrabold text-brand-300 hover:bg-brand-500/20 transition-all"
             >
-              <span>📍 Distance Active</span>
+              <MapPin className="h-3.5 w-3.5" />
+              <span>Distance Active</span>
               <span className="text-xs bg-brand-500/30 rounded-full px-1.5 py-0.5">✕</span>
             </button>
           ) : (
@@ -201,14 +209,15 @@ export default function BusinessDirectoryClient({
               isLoading={geoLoading}
               variant="primary"
               size="md"
-              className="rounded-full !py-2.5 shadow-[0_0_20px_rgba(160,120,255,0.25)]"
+              className="rounded-full !py-2.5 shadow-[0_0_20px_rgba(160,120,255,0.25)] flex items-center gap-1.5"
             >
-              📍 Near Me
+              <MapPin className="h-3.5 w-3.5" />
+              <span>Near Me</span>
             </Button>
           )}
         </div>
 
-        {/* Category Chips (Stitch Design) */}
+        {/* Category Chips */}
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
           {CATEGORY_CHIPS.map((chip) => {
             const isActive = activeCategory === chip.filter;
@@ -229,8 +238,9 @@ export default function BusinessDirectoryClient({
         </div>
 
         {geoError && (
-          <p className="text-xs text-danger-400 font-medium">
-            ⚠️ {geoError}
+          <p className="text-xs text-danger-400 font-medium flex items-center gap-1.5">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            <span>{geoError}</span>
           </p>
         )}
 
@@ -264,7 +274,7 @@ export default function BusinessDirectoryClient({
                   key={business.id}
                   className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#161b22] shadow-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/15 hover:border-brand-500/40 relative"
                 >
-                  {/* Left Hover Accent Strip (Stitch Design) */}
+                  {/* Left Hover Accent Strip */}
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-400 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
 
                   {/* Top Cover Image Area */}
@@ -281,7 +291,7 @@ export default function BusinessDirectoryClient({
                     ) : (
                       /* Clean Placeholder with Dark Gradient */
                       <div className="h-full w-full bg-gradient-to-br from-brand-900 via-indigo-950 to-slate-950 flex items-center justify-center p-6 text-center">
-                        <span className="text-4xl opacity-30">🏬</span>
+                        <Building2 className="h-10 w-10 text-brand-300 opacity-30" />
                       </div>
                     )}
 
@@ -290,8 +300,9 @@ export default function BusinessDirectoryClient({
 
                     {/* Distance Badge if Geolocation enabled */}
                     {business.distance !== null && (
-                      <span className="absolute top-3 right-3 rounded-full bg-slate-950/80 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/20 shadow-md">
-                        📍 {business.distance.toFixed(1)} miles away
+                      <span className="absolute top-3 right-3 rounded-full bg-slate-950/80 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/20 shadow-md flex items-center gap-1">
+                        <MapPin className="h-3 w-3 text-white" />
+                        <span>{business.distance.toFixed(1)} miles away</span>
                       </span>
                     )}
 
@@ -303,9 +314,16 @@ export default function BusinessDirectoryClient({
                         </h3>
                       </Link>
                       <p className="text-[11px] font-medium text-slate-300 flex items-center gap-2 truncate">
-                        <span>🕒 {business.timezone}</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3 text-slate-300 shrink-0" />
+                          <span>{business.timezone}</span>
+                        </span>
                         {business.address && (
-                          <span className="truncate"> • 📍 {business.address}</span>
+                          <span className="truncate flex items-center gap-1">
+                            <span>•</span>
+                            <MapPin className="h-3 w-3 text-slate-300 shrink-0" />
+                            <span>{business.address}</span>
+                          </span>
                         )}
                       </p>
                     </div>

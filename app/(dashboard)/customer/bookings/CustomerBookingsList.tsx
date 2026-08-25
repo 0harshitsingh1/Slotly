@@ -30,6 +30,8 @@ interface CustomerBookingsListProps {
 
 export type FilterTab = "all" | "upcoming" | "past" | "cancelled";
 
+import { Ticket } from "lucide-react";
+
 export function CustomerBookingsList({ bookings }: CustomerBookingsListProps) {
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
 
@@ -158,7 +160,7 @@ export function CustomerBookingsList({ bookings }: CustomerBookingsListProps) {
       ) : (
         <Card className="p-12 text-center border-dashed">
           <div className="space-y-2">
-            <span className="text-3xl">🎟️</span>
+            <Ticket className="h-10 w-10 text-slate-400 mx-auto" />
             <h3 className="font-heading font-bold text-slate-900 dark:text-white text-base">
               No bookings found
             </h3>

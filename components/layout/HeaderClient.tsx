@@ -5,6 +5,14 @@ import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import {
+  LayoutDashboard,
+  Search,
+  Info,
+  Calendar,
+  User,
+  HelpCircle,
+} from "lucide-react";
 
 export interface HeaderUser {
   id?: string;
@@ -299,23 +307,26 @@ export function HeaderClient({ user }: HeaderClientProps) {
                 <Link
                   href="/owner"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  📊 Owner Dashboard
+                  <LayoutDashboard className="h-4 w-4 text-slate-400 shrink-0" />
+                  <span>Owner Dashboard</span>
                 </Link>
                 <Link
                   href="/profile"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  ⚙️ Profile Settings
+                  <User className="h-4 w-4 text-slate-400 shrink-0" />
+                  <span>Profile Settings</span>
                 </Link>
                 <Link
                   href="/support"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  🎧 Customer Support
+                  <HelpCircle className="h-4 w-4 text-slate-400 shrink-0" />
+                  <span>Customer Support</span>
                 </Link>
               </>
             ) : (
@@ -323,16 +334,18 @@ export function HeaderClient({ user }: HeaderClientProps) {
                 <Link
                   href="/businesses"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  🔍 Explore Businesses
+                  <Search className="h-4 w-4 text-slate-400 shrink-0" />
+                  <span>Explore Businesses</span>
                 </Link>
                 <Link
                   href="/about"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  ℹ️ About Slotly
+                  <Info className="h-4 w-4 text-slate-400 shrink-0" />
+                  <span>About Slotly</span>
                 </Link>
 
                 {user && (
@@ -340,23 +353,26 @@ export function HeaderClient({ user }: HeaderClientProps) {
                     <Link
                       href="/customer/bookings"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                     >
-                      📋 My Bookings
+                      <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
+                      <span>My Bookings</span>
                     </Link>
                     <Link
                       href="/profile"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                     >
-                      ⚙️ Profile Settings
+                      <User className="h-4 w-4 text-slate-400 shrink-0" />
+                      <span>Profile Settings</span>
                     </Link>
                     <Link
                       href="/support"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                     >
-                      🎧 Customer Support
+                      <HelpCircle className="h-4 w-4 text-slate-400 shrink-0" />
+                      <span>Customer Support</span>
                     </Link>
                   </>
                 )}
