@@ -3,11 +3,20 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  Building2,
+  Scissors,
+  Calendar,
+  Ticket,
+  TrendingUp,
+  LucideIcon,
+} from "lucide-react";
 
 export interface OwnerNavItem {
   name: string;
   href: string;
-  icon: string;
+  icon: LucideIcon;
   exact?: boolean;
   matchPrefixes?: string[];
 }
@@ -16,38 +25,38 @@ const ownerNavItems: OwnerNavItem[] = [
   {
     name: "Dashboard",
     href: "/owner",
-    icon: "📊",
+    icon: LayoutDashboard,
     exact: true,
   },
   {
     name: "Business Settings",
     href: "/owner/business/edit",
     matchPrefixes: ["/owner/business"],
-    icon: "🏢",
+    icon: Building2,
   },
   {
     name: "Services",
     href: "/owner/services",
     matchPrefixes: ["/owner/services"],
-    icon: "💇‍♂️",
+    icon: Scissors,
   },
   {
     name: "Availability Schedule",
     href: "/owner/availability",
     matchPrefixes: ["/owner/availability"],
-    icon: "📅",
+    icon: Calendar,
   },
   {
     name: "Customer Bookings",
     href: "/owner/bookings",
     matchPrefixes: ["/owner/bookings"],
-    icon: "🎟️",
+    icon: Ticket,
   },
   {
     name: "Analytics",
     href: "/owner/analytics",
     matchPrefixes: ["/owner/analytics"],
-    icon: "📈",
+    icon: TrendingUp,
   },
 ];
 
@@ -71,13 +80,14 @@ export function OwnerSidebar() {
   };
 
   const activeItem = ownerNavItems.find(isItemActive) || ownerNavItems[0];
+  const ActiveHeaderIcon = activeItem.icon;
 
   return (
     <>
       {/* Mobile Top Sub-Header Bar (Mobile Only) */}
       <div className="md:hidden sticky top-16 z-40 w-full bg-[#161b22]/95 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{activeItem.icon}</span>
+        <div className="flex items-center gap-2.5">
+          <ActiveHeaderIcon className="h-5 w-5 text-brand-400 shrink-0" />
           <span className="font-heading font-extrabold text-sm text-slate-100">
             {activeItem.name}
           </span>
@@ -124,18 +134,23 @@ export function OwnerSidebar() {
           <nav className="space-y-1 pt-1">
             {ownerNavItems.map((item) => {
               const active = isItemActive(item);
+              const ItemIcon = item.icon;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                  className={`group flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${
                     active
                       ? "bg-brand-500/20 text-brand-300 border-l-4 border-brand-400 shadow-sm"
                       : "text-slate-300 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <span className="text-base">{item.icon}</span>
+                  <ItemIcon
+                    className={`h-4 w-4 shrink-0 transition-colors ${
+                      active ? "text-brand-300" : "text-slate-400 group-hover:text-slate-200"
+                    }`}
+                  />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -160,6 +175,7 @@ export function OwnerSidebar() {
         <nav className="flex-1 space-y-1.5 font-sans">
           {ownerNavItems.map((item) => {
             const active = isItemActive(item);
+            const ItemIcon = item.icon;
             return (
               <Link
                 key={item.name}
@@ -170,9 +186,11 @@ export function OwnerSidebar() {
                     : "text-slate-400 hover:text-slate-100 hover:bg-white/5 font-semibold"
                 }`}
               >
-                <span className="text-lg transition-transform group-hover:scale-110">
-                  {item.icon}
-                </span>
+                <ItemIcon
+                  className={`h-4 w-4 shrink-0 transition-all group-hover:scale-110 ${
+                    active ? "text-brand-300" : "text-slate-400 group-hover:text-slate-200"
+                  }`}
+                />
                 <span>{item.name}</span>
               </Link>
             );
