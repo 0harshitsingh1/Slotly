@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import BusinessDirectoryClient from "./BusinessDirectoryClient";
 
 export const metadata = {
-  title: "Explore Businesses — Slotly Directory",
+  title: "Explore Businesses",
   description: "Browse local service providers, search by services, and find appointments near you.",
 };
 

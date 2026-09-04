@@ -9,7 +9,7 @@ interface ResetPasswordPageProps {
 }
 
 export const metadata = {
-  title: "Reset Password — Slotly",
+  title: "Reset Password",
   description: "Set a new password for your Slotly account.",
 };
 

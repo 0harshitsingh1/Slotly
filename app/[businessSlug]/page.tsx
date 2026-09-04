@@ -35,6 +35,25 @@ function formatSlotTime(date: Date, timezone: string): string {
   }
 }
 
+export async function generateMetadata({ params }: BusinessBookingPageProps) {
+  const { businessSlug } = await params;
+  const business = await db.business.findUnique({
+    where: { slug: businessSlug },
+    select: { name: true, description: true },
+  });
+
+  if (!business) {
+    return {
+      title: "Business Not Found",
+    };
+  }
+
+  return {
+    title: business.name,
+    description: business.description || `Book your appointment at ${business.name} today.`,
+  };
+}
+
 export default async function BusinessBookingPage({
   params,
   searchParams,

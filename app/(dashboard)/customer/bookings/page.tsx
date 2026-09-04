@@ -5,7 +5,7 @@ import db from "@/lib/db";
 import { CustomerBookingsList, SerializedCustomerBooking } from "./CustomerBookingsList";
 
 export const metadata = {
-  title: "My Appointments — Customer Dashboard",
+  title: "My Appointments",
   description: "View and manage your upcoming, past, and cancelled reservations.",
 };
 

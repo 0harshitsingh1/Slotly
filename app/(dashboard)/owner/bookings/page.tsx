@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { OwnerBookingsList, SerializedOwnerBooking } from "./OwnerBookingsList";
 
 export const metadata = {
-  title: "Bookings — Owner Dashboard",
+  title: "Bookings",
   description: "View and manage customer appointment reservations.",
 };
 

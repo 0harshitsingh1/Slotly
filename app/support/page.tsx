@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Support — Slotly Platform",
+  title: "Support",
   description: "Get assistance and support for your Slotly account and bookings.",
 };
 

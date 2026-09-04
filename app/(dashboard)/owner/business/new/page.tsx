@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { CreateBusinessForm } from "./_components/CreateBusinessForm";
 
 export const metadata = {
-  title: "Create Business — Slotly",
+  title: "Create Business",
   description: "Set up your business profile on Slotly.",
 };
 

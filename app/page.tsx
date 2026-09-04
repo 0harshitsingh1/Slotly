@@ -2,7 +2,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 
 export const metadata = {
-  title: "Slotly — Modern Online Appointment Scheduling Platform",
+  title: "Modern Online Appointment Scheduling Platform",
   description: "Seamless online booking and appointment management for local businesses and clients.",
 };
 

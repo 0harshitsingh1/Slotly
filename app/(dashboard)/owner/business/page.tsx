@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 
 export const metadata = {
-  title: "Manage Business Profile — Slotly",
+  title: "Manage Business Profile",
   description: "Update your business details, address, and profile settings.",
 };
 

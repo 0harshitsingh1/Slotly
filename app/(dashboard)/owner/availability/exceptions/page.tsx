@@ -6,7 +6,7 @@ import ExceptionForm from "./ExceptionForm";
 import DeleteExceptionButton from "./DeleteExceptionButton";
 
 export const metadata = {
-  title: "Schedule Exceptions — Owner Dashboard",
+  title: "Schedule Exceptions",
 };
 
 function formatExceptionDate(date: Date): string {

@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "Owner Dashboard — Slotly",
+  title: "Owner Dashboard",
   description: "Manage your business, services, availability schedule, and customer reservations.",
 };
 

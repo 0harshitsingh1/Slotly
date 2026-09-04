@@ -6,7 +6,7 @@ import { EditBusinessForm } from "../_components/EditBusinessForm";
 import { BusinessImageManager } from "../_components/BusinessImageManager";
 
 export const metadata = {
-  title: "Edit Business Profile — Slotly",
+  title: "Edit Business Profile",
   description: "Update your business profile details, address, photos, and location coordinates.",
 };
 

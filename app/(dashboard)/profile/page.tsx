@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { ProfileForm } from "./ProfileForm";
 
 export const metadata = {
-  title: "Account Profile — Slotly",
+  title: "Account Profile",
   description: "Manage your personal account settings and profile details.",
 };
 

@@ -7,7 +7,7 @@ import { AddServiceForm } from "./_components/AddServiceForm";
 import { EditServiceModal } from "./_components/EditServiceModal";
 
 export const metadata = {
-  title: "Services — Slotly Owner Dashboard",
+  title: "Services",
   description: "Manage services offered by your business.",
 };
 

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "Customer Dashboard — Slotly",
+  title: "Customer Dashboard",
   description: "View and manage your appointment reservations.",
 };
 

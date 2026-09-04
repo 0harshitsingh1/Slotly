@@ -5,7 +5,7 @@ import db from "@/lib/db";
 import AnalyticsCharts, { DailyDataPoint } from "./AnalyticsCharts";
 
 export const metadata = {
-  title: "Analytics & Performance — Owner Dashboard",
+  title: "Analytics & Performance",
   description: "View booking trends, monthly revenue, and business analytics.",
 };
 
