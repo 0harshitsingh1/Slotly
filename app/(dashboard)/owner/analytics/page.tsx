@@ -59,11 +59,13 @@ export default async function OwnerAnalyticsPage() {
   thirtyDaysAgo.setDate(now.getDate() - 29);
   thirtyDaysAgo.setHours(0, 0, 0, 0);
 
-  // Fetch all CONFIRMED bookings for this business
+  // Fetch all CONFIRMED and COMPLETED bookings for this business
   const confirmedBookings = await db.booking.findMany({
     where: {
       business_id: business.id,
-      status: "CONFIRMED",
+      status: {
+        in: ["CONFIRMED", "COMPLETED"],
+      },
     },
     include: {
       service: {

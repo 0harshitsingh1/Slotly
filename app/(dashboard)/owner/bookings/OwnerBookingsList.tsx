@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import CancelBookingButton from "./CancelBookingButton";
+import BookingActionButtons from "./BookingActionButtons";
 
 export interface SerializedOwnerBooking {
   id: string;
@@ -186,9 +186,10 @@ export function OwnerBookingsList({ bookings, timezone }: OwnerBookingsListProps
                       </div>
 
                       <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-                        <CancelBookingButton
+                        <BookingActionButtons
                           bookingId={booking.id}
-                          isCancelled={isCancelled}
+                          status={booking.status}
+                          endAt={booking.end_at}
                         />
                       </div>
                     </div>

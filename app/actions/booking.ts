@@ -288,6 +288,115 @@ export async function cancelOwnerBookingAction(
 }
 
 /**
+ * Server Action for an owner to mark a booking as COMPLETED.
+ * Strictly verifies that the authenticated user owns the business associated with the booking,
+ * and that the booking's end_at time is in the past.
+ */
+export async function completeOwnerBookingAction(
+  formData: FormData
+): Promise<BookingActionResult> {
+  const session = await auth();
+
+  if (!session?.user || session.user.role !== "OWNER") {
+    return {
+      success: false,
+      message: "Unauthorized. Owner permissions required.",
+    };
+  }
+
+  const bookingId = formData.get("bookingId") as string;
+
+  if (!bookingId) {
+    return {
+      success: false,
+      message: "Booking ID is required.",
+    };
+  }
+
+  try {
+    const booking = await db.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        customer: { select: { email: true, name: true } },
+        business: { select: { owner_id: true, name: true, slug: true, timezone: true } },
+        service: { select: { name: true, price: true } },
+      },
+    });
+
+    if (!booking) {
+      return {
+        success: false,
+        message: "Booking not found.",
+      };
+    }
+
+    // Authorization Guard
+    if (booking.business.owner_id !== session.user.id) {
+      return {
+        success: false,
+        message: "Unauthorized. You can only modify bookings for your own business.",
+      };
+    }
+
+    // Status Validation
+    if (booking.status !== "CONFIRMED") {
+      return {
+        success: false,
+        message: `Cannot complete this booking because it is currently ${booking.status}.`,
+      };
+    }
+
+    // Time Validation (Server-side check!)
+    if (new Date() < new Date(booking.end_at)) {
+      return {
+        success: false,
+        message: "Cannot mark booking as completed before the appointment time has ended.",
+      };
+    }
+
+    await db.booking.update({
+      where: { id: bookingId },
+      data: { status: "COMPLETED" },
+    });
+
+    const formattedTime = formatTimeInTimezone(
+      booking.start_at,
+      booking.business.timezone
+    );
+
+    // Trigger Completed Email
+    try {
+      const { sendBookingCompletedEmail } = await import("@/lib/email");
+      await sendBookingCompletedEmail({
+        bookingId: booking.id,
+        customerEmail: booking.customer.email,
+        customerName: booking.customer.name,
+        businessName: booking.business.name,
+        businessSlug: booking.business.slug,
+        serviceName: booking.service.name,
+        formattedTime,
+        price: booking.service.price,
+      });
+    } catch (emailErr) {
+      console.error("Error triggering booking completed email:", emailErr);
+    }
+
+    revalidatePath("/owner/bookings");
+
+    return {
+      success: true,
+      message: "Booking marked as completed successfully.",
+    };
+  } catch (error) {
+    console.error("completeOwnerBookingAction error:", error);
+    return {
+      success: false,
+      message: "Failed to mark booking as completed. Please try again.",
+    };
+  }
+}
+
+/**
  * Server Action for a customer to cancel their own booking.
  * Only allowed if:
  * 1. User is authenticated.
