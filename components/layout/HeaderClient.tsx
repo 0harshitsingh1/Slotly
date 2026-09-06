@@ -1,18 +1,11 @@
-"use client";
-
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import {
-  LayoutDashboard,
-  Search,
-  Info,
-  Calendar,
-  User,
-  HelpCircle,
-} from "lucide-react";
+import { OwnerDropdownMenu } from "./OwnerDropdownMenu";
+import { CustomerDropdownMenu } from "./CustomerDropdownMenu";
+import { MobileNavSheet } from "./MobileNavSheet";
 
 export interface HeaderUser {
   id?: string;
@@ -64,8 +57,6 @@ export function HeaderClient({ user }: HeaderClientProps) {
     }
     return "U";
   };
-
-  const dashboardHref = user?.role === "OWNER" ? "/owner" : "/customer/bookings";
 
   const headerClassName = `sticky top-0 z-50 w-full border-b border-slate-200/80 transition-colors duration-200 ${
     scrolled
@@ -186,64 +177,13 @@ export function HeaderClient({ user }: HeaderClientProps) {
 
                   <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
 
-                  {/* Navigation Options */}
+                  {/* Navigation Options separated by Role */}
                   <div className="space-y-0.5">
-                    <Link
-                      href={dashboardHref}
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                    >
-                      <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                      </svg>
-                      {user.role === "OWNER" ? "Owner Dashboard" : "My Bookings"}
-                    </Link>
-
-                    <Link
-                      href="/profile"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                    >
-                      <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      Profile Settings
-                    </Link>
-
-                    {user.role === "OWNER" && (
-                      <Link
-                        href="/owner/business/edit"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                      >
-                        <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                        Business Profile
-                      </Link>
+                    {user.role === "OWNER" ? (
+                      <OwnerDropdownMenu user={user} onClose={() => setDropdownOpen(false)} />
+                    ) : (
+                      <CustomerDropdownMenu user={user} onClose={() => setDropdownOpen(false)} />
                     )}
-
-                    <Link
-                      href="/businesses"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                    >
-                      <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                      Explore Businesses
-                    </Link>
-
-                    <Link
-                      href="/support"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                    >
-                      <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                      Support
-                    </Link>
                   </div>
 
                   <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
@@ -300,101 +240,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
 
       {/* Collapsible Mobile Menu Sheet */}
       {mobileMenuOpen && (
-        <div className="border-b border-slate-200 bg-white p-4 md:hidden dark:border-slate-800 dark:bg-slate-950 animate-in slide-in-from-top duration-200 space-y-3">
-          <div className="space-y-1">
-            {user?.role === "OWNER" ? (
-              <>
-                <Link
-                  href="/owner"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  <LayoutDashboard className="h-4 w-4 text-slate-400 shrink-0" />
-                  <span>Owner Dashboard</span>
-                </Link>
-                <Link
-                  href="/profile"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  <User className="h-4 w-4 text-slate-400 shrink-0" />
-                  <span>Profile Settings</span>
-                </Link>
-                <Link
-                  href="/support"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  <HelpCircle className="h-4 w-4 text-slate-400 shrink-0" />
-                  <span>Customer Support</span>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/businesses"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  <Search className="h-4 w-4 text-slate-400 shrink-0" />
-                  <span>Explore Businesses</span>
-                </Link>
-                <Link
-                  href="/about"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  <Info className="h-4 w-4 text-slate-400 shrink-0" />
-                  <span>About Slotly</span>
-                </Link>
-
-                {user && (
-                  <>
-                    <Link
-                      href="/customer/bookings"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
-                      <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
-                      <span>My Bookings</span>
-                    </Link>
-                    <Link
-                      href="/profile"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
-                      <User className="h-4 w-4 text-slate-400 shrink-0" />
-                      <span>Profile Settings</span>
-                    </Link>
-                    <Link
-                      href="/support"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
-                      <HelpCircle className="h-4 w-4 text-slate-400 shrink-0" />
-                      <span>Customer Support</span>
-                    </Link>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-
-          {!user && (
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" size="sm" fullWidth>
-                  Log in
-                </Button>
-              </Link>
-              <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="primary" size="sm" fullWidth>
-                  Sign up
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
+        <MobileNavSheet user={user} onClose={() => setMobileMenuOpen(false)} />
       )}
     </header>
   );
