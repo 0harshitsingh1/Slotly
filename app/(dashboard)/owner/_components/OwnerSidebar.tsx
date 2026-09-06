@@ -160,7 +160,7 @@ export function OwnerSidebar() {
       )}
 
       {/* Desktop Persistent Left Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 shrink-0 bg-[#161b22]/90 backdrop-blur-xl border-r border-white/10 p-5 space-y-6 min-h-[calc(100vh-4rem)]">
+      <aside className="hidden md:flex flex-col w-64 shrink-0 bg-gradient-to-b from-[#161b22]/95 to-[#0f141a]/95 backdrop-blur-xl border-r border-white/10 p-5 space-y-6 fixed top-16 left-0 h-[calc(100vh-4rem)] overflow-y-auto animate-fade-in">
         {/* Sidebar Header */}
         <div className="space-y-1 pb-4 border-b border-white/10">
           <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-400 block">

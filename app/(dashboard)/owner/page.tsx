@@ -142,7 +142,7 @@ export default async function OwnerDashboardPage({ searchParams }: OwnerDashboar
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto font-sans">
+    <div className="px-4 sm:px-6 lg:px-8 py-2 sm:py-4 space-y-6 max-w-7xl mx-auto font-sans">
       {error === "owner_booking_disabled" && (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 text-amber-200 flex items-center gap-3 backdrop-blur-xl shadow-md">
           <span className="text-xl">⚠️</span>
@@ -153,7 +153,7 @@ export default async function OwnerDashboardPage({ searchParams }: OwnerDashboar
       )}
 
         {/* Dashboard Overview Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-white/10 bg-[#161b22]/90 p-6 sm:p-8 shadow-[0_12px_48px_rgba(139,92,246,0.12)] backdrop-blur-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-white/10 bg-[#161b22]/90 p-6 sm:p-8 shadow-[0_12px_48px_rgba(139,92,246,0.12)] backdrop-blur-xl animate-fade-up delay-100">
           <div className="space-y-1">
             <h1 className="font-heading text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-100 dark:text-white">
               Dashboard Overview
@@ -216,7 +216,7 @@ export default async function OwnerDashboardPage({ searchParams }: OwnerDashboar
         )}
 
         {/* Summary Bento Grid Metrics Cards */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 animate-fade-up delay-200">
           {/* Card 1: Total Revenue */}
           <div className="rounded-2xl border border-white/10 bg-[#161b22] p-6 shadow-md relative overflow-hidden flex flex-col justify-between group">
             <div className="absolute -right-4 -top-4 w-28 h-28 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-500/20 transition-all pointer-events-none" />
@@ -283,7 +283,7 @@ export default async function OwnerDashboardPage({ searchParams }: OwnerDashboar
         </div>
 
         {/* Business Management Navigation Cards */}
-        <div className="space-y-4">
+        <div className="space-y-4 animate-fade-up delay-300">
           <h2 className="font-heading text-xl font-extrabold text-slate-100">
             Business Management
           </h2>
@@ -328,7 +328,7 @@ export default async function OwnerDashboardPage({ searchParams }: OwnerDashboar
         </div>
 
         {/* Recent Bookings Preview List */}
-        <div className="space-y-4">
+        <div className="space-y-4 animate-fade-up delay-300">
           <div className="flex items-center justify-between">
             <h2 className="font-heading text-xl font-extrabold text-slate-100 flex items-center gap-2">
               <span>Recent Bookings</span>

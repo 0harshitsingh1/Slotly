@@ -14,7 +14,7 @@ export default function OwnerLayout({
 
       <div className="relative z-10 flex flex-col md:flex-row min-h-[calc(100vh-4rem)]">
         <OwnerSidebar />
-        <main className="flex-1 min-w-0 animate-page-enter">
+        <main className="flex-1 min-w-0 md:pl-64 animate-page-enter">
           {children}
         </main>
       </div>
