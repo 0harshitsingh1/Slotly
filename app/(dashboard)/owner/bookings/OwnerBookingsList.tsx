@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import BookingActionButtons from "./BookingActionButtons";
+import { MiniCalendar } from "./MiniCalendar";
+import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 export interface SerializedOwnerBooking {
   id: string;
@@ -27,7 +29,7 @@ interface OwnerBookingsListProps {
   timezone: string;
 }
 
-export type FilterTab = "all" | "upcoming" | "past" | "cancelled";
+export type FilterTab = "calendar" | "upcoming" | "past";
 
 function formatSlotTime(isoString: string, timezone: string): string {
   try {
@@ -61,17 +63,33 @@ function formatDateHeader(isoString: string, timezone: string): string {
 }
 
 export function OwnerBookingsList({ bookings, timezone }: OwnerBookingsListProps) {
-  const [activeTab, setActiveTab] = useState<FilterTab>("all");
+  const [activeTab, setActiveTab] = useState<FilterTab>("calendar");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   const now = new Date();
 
-  const upcomingBookings = bookings.filter(
-    (b) => new Date(b.end_at) >= now && b.status !== "CANCELLED"
-  );
-  const pastBookings = bookings.filter(
-    (b) => new Date(b.end_at) < now && b.status !== "CANCELLED"
-  );
-  const cancelledBookings = bookings.filter((b) => b.status === "CANCELLED");
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    setActiveTab("calendar");
+  };
+
+  const selectedDateStr = format(selectedDate, "yyyy-MM-dd");
+
+  // Calendar View Filtering
+  const calendarBookings = bookings.filter((b) => {
+    const bookingDateStr = formatInTimeZone(new Date(b.start_at), timezone, "yyyy-MM-dd");
+    return bookingDateStr === selectedDateStr;
+  });
+
+  // Upcoming View (All future CONFIRMED bookings, sorted soonest first)
+  const upcomingBookings = bookings
+    .filter((b) => b.status === "CONFIRMED" && new Date(b.end_at) >= now)
+    .sort((a, b) => new Date(a.start_at).getTime() - new Date(b.start_at).getTime());
+
+  // Past View (COMPLETED or CANCELLED, sorted most recent first)
+  const pastBookings = bookings
+    .filter((b) => b.status === "COMPLETED" || b.status === "CANCELLED" || new Date(b.end_at) < now)
+    .sort((a, b) => new Date(b.start_at).getTime() - new Date(a.start_at).getTime());
 
   const getFilteredBookings = () => {
     switch (activeTab) {
@@ -79,17 +97,15 @@ export function OwnerBookingsList({ bookings, timezone }: OwnerBookingsListProps
         return upcomingBookings;
       case "past":
         return pastBookings;
-      case "cancelled":
-        return cancelledBookings;
-      case "all":
+      case "calendar":
       default:
-        return bookings;
+        return calendarBookings;
     }
   };
 
   const filteredList = getFilteredBookings();
 
-  // Group filtered bookings by date label
+  // Group filtered bookings by date label (for Upcoming/Past list views)
   const groupedMap = new Map<string, SerializedOwnerBooking[]>();
   for (const b of filteredList) {
     const label = formatDateHeader(b.start_at, timezone);
@@ -100,11 +116,13 @@ export function OwnerBookingsList({ bookings, timezone }: OwnerBookingsListProps
   }
   const groupedEntries = Array.from(groupedMap.entries());
 
-  const tabs: { id: FilterTab; label: string; count: number }[] = [
-    { id: "all", label: "All Bookings", count: bookings.length },
+  // Generate bookedDates for the MiniCalendar (all bookings across all statuses formatted in business timezone)
+  const bookedDates = bookings.map((b) => formatInTimeZone(new Date(b.start_at), timezone, "yyyy-MM-dd"));
+
+  const tabs: { id: FilterTab; label: string; count: number | null }[] = [
+    { id: "calendar", label: "Calendar View", count: null },
     { id: "upcoming", label: "Upcoming", count: upcomingBookings.length },
     { id: "past", label: "Past", count: pastBookings.length },
-    { id: "cancelled", label: "Cancelled", count: cancelledBookings.length },
   ];
 
   return (
@@ -125,93 +143,114 @@ export function OwnerBookingsList({ bookings, timezone }: OwnerBookingsListProps
               }`}
             >
               <span>{tab.label}</span>
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
-                  isActive
-                    ? "bg-white/20 text-white"
-                    : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                }`}
-              >
-                {tab.count}
-              </span>
+              {tab.count !== null && (
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
+                    isActive
+                      ? "bg-white/20 text-white"
+                      : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              )}
             </button>
           );
         })}
       </div>
 
-      {/* Bookings Display Grouped by Date */}
-      {groupedEntries.length > 0 ? (
-        <div className="space-y-5">
-          {groupedEntries.map(([dateLabel, groupItems]) => (
-            <Card key={dateLabel} className="p-5">
-              <h3 className="font-heading font-extrabold text-sm text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2.5 mb-3 flex items-center gap-2">
-                <span>📅 {dateLabel}</span>
-                <span className="text-xs font-normal text-slate-400">
-                  ({groupItems.length} slot{groupItems.length !== 1 ? "s" : ""})
-                </span>
-              </h3>
+      <div className={`grid grid-cols-1 ${activeTab === "calendar" ? "lg:grid-cols-[340px_1fr] gap-8" : "gap-0"}`}>
+        {/* Calendar Side Pane (Only visible in Calendar Mode) */}
+        {activeTab === "calendar" && (
+          <div className="order-1 lg:order-1 self-start sticky top-8">
+            <MiniCalendar
+              selectedDate={selectedDate}
+              onSelectDate={handleDateSelect}
+              bookedDates={bookedDates}
+              timezone={timezone}
+            />
+          </div>
+        )}
 
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {groupItems.map((booking) => {
-                  const startTime = formatSlotTime(booking.start_at, timezone);
-                  const endTime = formatSlotTime(booking.end_at, timezone);
-                  const isCancelled = booking.status === "CANCELLED";
+        {/* Bookings Display */}
+        <div className={`order-2 ${activeTab === "calendar" ? "lg:order-2" : ""}`}>
+          {groupedEntries.length > 0 ? (
+            <div className="space-y-5">
+              {groupedEntries.map(([dateLabel, groupItems]) => (
+                <Card key={dateLabel} className="p-5">
+                  <h3 className="font-heading font-extrabold text-sm text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2.5 mb-3 flex items-center gap-2">
+                    <span>📅 {dateLabel}</span>
+                    <span className="text-xs font-normal text-slate-400">
+                      ({groupItems.length} slot{groupItems.length !== 1 ? "s" : ""})
+                    </span>
+                  </h3>
 
-                  return (
-                    <div
-                      key={booking.id}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3.5 gap-3"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-900 dark:text-white text-base">
-                            {booking.service.name}
-                          </span>
-                          <Badge status={booking.status} size="sm" />
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {groupItems.map((booking) => {
+                      const startTime = formatSlotTime(booking.start_at, timezone);
+                      const endTime = formatSlotTime(booking.end_at, timezone);
+
+                      return (
+                        <div
+                          key={booking.id}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3.5 gap-3"
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900 dark:text-white text-base">
+                                {booking.service.name}
+                              </span>
+                              <Badge status={booking.status} size="sm" />
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-300">
+                              Customer:{" "}
+                              <span className="font-medium text-slate-900 dark:text-white">
+                                {booking.customer.name || booking.customer.email}
+                              </span>{" "}
+                              ({booking.customer.email})
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              Time:{" "}
+                              <span className="font-semibold text-brand-600 dark:text-brand-400">
+                                {startTime} - {endTime}
+                              </span>{" "}
+                              • Price: ₹{booking.service.price.toFixed(2)} ({booking.service.duration_minutes} min)
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+                            <BookingActionButtons
+                              bookingId={booking.id}
+                              status={booking.status}
+                              endAt={booking.end_at}
+                            />
+                          </div>
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-300">
-                          Customer:{" "}
-                          <span className="font-medium text-slate-900 dark:text-white">
-                            {booking.customer.name || booking.customer.email}
-                          </span>{" "}
-                          ({booking.customer.email})
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Time:{" "}
-                          <span className="font-semibold text-brand-600 dark:text-brand-400">
-                            {startTime} - {endTime}
-                          </span>{" "}
-                          • Price: ₹{booking.service.price.toFixed(2)} ({booking.service.duration_minutes} min)
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-                        <BookingActionButtons
-                          bookingId={booking.id}
-                          status={booking.status}
-                          endAt={booking.end_at}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                      );
+                    })}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="p-12 text-center border-dashed bg-transparent shadow-none border-slate-200 dark:border-white/10">
+              <div className="space-y-3">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-[#161b22] text-2xl border border-slate-200 dark:border-white/5">
+                  📅
+                </div>
+                <h3 className="font-heading font-bold text-slate-900 dark:text-white text-base">
+                  No bookings scheduled
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                  {activeTab === "calendar"
+                    ? `There are no appointments on ${format(selectedDate, "EEEE, MMM d, yyyy")}.`
+                    : `There are no ${activeTab} bookings.`}
+                </p>
               </div>
             </Card>
-          ))}
+          )}
         </div>
-      ) : (
-        <Card className="p-12 text-center border-dashed">
-          <div className="space-y-2">
-            <span className="text-3xl">📑</span>
-            <h3 className="font-heading font-bold text-slate-900 dark:text-white text-base">
-              No bookings found
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-              There are no customer reservations under the selected tab ({activeTab}).
-            </p>
-          </div>
-        </Card>
-      )}
+      </div>
     </div>
   );
 }
