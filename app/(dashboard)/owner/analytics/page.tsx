@@ -17,6 +17,9 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+import { formatInTimeZone } from "date-fns-tz";
+import { subDays } from "date-fns";
+
 export default async function OwnerAnalyticsPage() {
   const session = await auth();
 
@@ -52,12 +55,7 @@ export default async function OwnerAnalyticsPage() {
   }
 
   const now = new Date();
-  const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-  // 30 days ago starting at 00:00:00
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(now.getDate() - 29);
-  thirtyDaysAgo.setHours(0, 0, 0, 0);
+  const currentMonthStr = formatInTimeZone(now, business.timezone, "yyyy-MM");
 
   // Fetch all CONFIRMED and COMPLETED bookings for this business
   const confirmedBookings = await db.booking.findMany({
@@ -76,54 +74,53 @@ export default async function OwnerAnalyticsPage() {
   });
 
   // Calculate metrics for current month
-  const thisMonthBookings = confirmedBookings.filter(
-    (b) => new Date(b.start_at) >= startOfCurrentMonth
-  );
+  const thisMonthBookings = confirmedBookings.filter((b) => {
+    const bookingMonth = formatInTimeZone(b.start_at, business.timezone, "yyyy-MM");
+    return bookingMonth === currentMonthStr;
+  });
+  
   const totalBookingsThisMonth = thisMonthBookings.length;
   const totalRevenueThisMonth = thisMonthBookings.reduce(
     (sum, b) => sum + (b.service?.price || 0),
     0
   );
 
-  // 30-day range calculations
-  const last30DaysConfirmed = confirmedBookings.filter(
-    (b) => new Date(b.start_at) >= thirtyDaysAgo
-  );
-  const avgBookingsPerDay = (last30DaysConfirmed.length / 30).toFixed(1);
-
   // Map 30 days of data for the chart
   const dailyDataMap = new Map<string, { bookings: number; revenue: number }>();
 
-  // Initialize all 30 days with 0
-  for (let i = 0; i < 30; i++) {
-    const d = new Date(thirtyDaysAgo);
-    d.setDate(d.getDate() + i);
-    const key = d.toISOString().split("T")[0];
+  // Initialize all 30 days with 0 (in business timezone)
+  for (let i = 29; i >= 0; i--) {
+    const d = subDays(now, i);
+    const key = formatInTimeZone(d, business.timezone, "yyyy-MM-dd");
     dailyDataMap.set(key, { bookings: 0, revenue: 0 });
   }
 
+  // 30-day range calculations
+  const thirtyDaysAgoKey = Array.from(dailyDataMap.keys())[0];
+  const last30DaysConfirmed = confirmedBookings.filter(
+    (b) => formatInTimeZone(b.start_at, business.timezone, "yyyy-MM-dd") >= thirtyDaysAgoKey
+  );
+  const avgBookingsPerDay = (last30DaysConfirmed.length / 30).toFixed(1);
+
   // Populate bookings into dailyDataMap
   last30DaysConfirmed.forEach((b) => {
-    try {
-      const dateKey = new Date(b.start_at).toISOString().split("T")[0];
-      if (dailyDataMap.has(dateKey)) {
-        const current = dailyDataMap.get(dateKey)!;
-        current.bookings += 1;
-        current.revenue += b.service?.price || 0;
-      }
-    } catch {
-      // Ignore invalid date parsing
+    const dateKey = formatInTimeZone(b.start_at, business.timezone, "yyyy-MM-dd");
+    if (dailyDataMap.has(dateKey)) {
+      const current = dailyDataMap.get(dateKey)!;
+      current.bookings += 1;
+      current.revenue += b.service?.price || 0;
     }
   });
 
   // Format array for recharts
   const chartData: DailyDataPoint[] = Array.from(dailyDataMap.entries()).map(
     ([dateStr, val]) => {
+      // Create a date object from the formatted string, assuming noon to avoid local offset issues
       const dateObj = new Date(`${dateStr}T12:00:00Z`);
       const label = new Intl.DateTimeFormat("en-US", {
         month: "short",
         day: "numeric",
-        timeZone: business.timezone,
+        timeZone: "UTC", // Use UTC because we manually crafted the noon UTC string
       }).format(dateObj);
 
       const fullLabel = new Intl.DateTimeFormat("en-US", {
@@ -131,7 +128,7 @@ export default async function OwnerAnalyticsPage() {
         month: "short",
         day: "numeric",
         year: "numeric",
-        timeZone: business.timezone,
+        timeZone: "UTC",
       }).format(dateObj);
 
       return {
@@ -143,7 +140,7 @@ export default async function OwnerAnalyticsPage() {
     }
   );
 
-  const hasAnyBookings = confirmedBookings.length > 0;
+  const hasAnyBookings = last30DaysConfirmed.length > 0;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto font-sans">

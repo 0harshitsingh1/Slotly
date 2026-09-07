@@ -44,7 +44,10 @@ export default function BookingActionButtons({
     formData.append("bookingId", bookingId);
 
     startTransition(async () => {
-      await completeOwnerBookingAction(formData);
+      const result = await completeOwnerBookingAction(formData);
+      if (result && result.message) {
+        alert(result.message);
+      }
     });
   };
 
