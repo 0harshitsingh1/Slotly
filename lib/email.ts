@@ -173,6 +173,83 @@ export async function sendBookingConfirmationEmail(details: BookingEmailDetails)
 }
 
 /**
+ * Send booking REMINDER HTML email via Brevo API
+ */
+export async function sendBookingReminderEmail(details: BookingEmailDetails) {
+  const { customerEmail, customerName, businessName, serviceName, formattedTime } = details;
+
+  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const manageUrl = `${baseUrl}/customer/bookings`;
+  const nameDisplay = customerName || "Valued Customer";
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f5; color: #18181b; margin: 0; padding: 20px; }
+          .container { max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e4e4e7; }
+          .header { background: #8b5cf6; padding: 24px; text-align: center; color: #ffffff; }
+          .header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+          .content { padding: 24px; }
+          .notice { background: #f3e8ff; border-left: 4px solid #a855f7; padding: 12px; margin-bottom: 16px; border-radius: 4px; color: #6b21a8; font-size: 14px; font-weight: 600; }
+          .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0; }
+          .table { width: 100%; border-collapse: collapse; }
+          .label { color: #64748b; font-size: 14px; font-weight: 500; padding: 6px 0; }
+          .value { color: #0f172a; font-size: 14px; font-weight: 600; text-align: right; padding: 6px 0; }
+          .btn { display: inline-block; background-color: #2563eb; color: #ffffff !important; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; text-align: center; margin-top: 12px; }
+          .footer { padding: 16px; text-align: center; font-size: 12px; color: #71717a; border-top: 1px solid #f4f4f5; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Upcoming Appointment Reminder</h1>
+          </div>
+          <div class="content">
+            <p>Hi <strong>${nameDisplay}</strong>,</p>
+            <div class="notice">
+              🗓️ This is a quick reminder that your appointment with <strong>${businessName}</strong> is coming up soon!
+            </div>
+            
+            <div class="card">
+              <table class="table">
+                <tr>
+                  <td class="label">Business:</td>
+                  <td class="value">${businessName}</td>
+                </tr>
+                <tr>
+                  <td class="label">Service:</td>
+                  <td class="value">${serviceName}</td>
+                </tr>
+                <tr>
+                  <td class="label">Date & Time:</td>
+                  <td class="value">${formattedTime}</td>
+                </tr>
+              </table>
+            </div>
+
+            <p style="font-size: 14px; color: #4b5563;">If you need to make a change, please manage your booking below:</p>
+            <a href="${manageUrl}" class="btn">Manage Booking</a>
+          </div>
+          <div class="footer">
+            <p>Sent by Slotly Appointment Scheduling</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return sendBrevoEmail({
+    toEmail: customerEmail,
+    toName: customerName,
+    subject: `Reminder: Your appointment coming up at ${businessName}`,
+    htmlContent,
+  });
+}
+
+/**
  * Send booking CANCELLATION HTML email via Brevo API
  */
 export async function sendBookingCancellationEmail(details: BookingEmailDetails) {

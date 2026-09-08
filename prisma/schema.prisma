@@ -175,8 +175,9 @@ model Booking {
   customer_id String
   start_at    DateTime      // Stored as UTC timestamp
   end_at      DateTime      // Stored as UTC timestamp
-  status      BookingStatus @default(PENDING)
-  created_at  DateTime      @default(now())
+  status        BookingStatus @default(PENDING)
+  reminder_sent Boolean       @default(false)
+  created_at    DateTime      @default(now())
 
   // Relations:
   // - FK to Business model.
